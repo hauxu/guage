@@ -1,0 +1,311 @@
+<Page
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:control="clr-namespace:UI.Controls"
+      xmlns:Btn="clr-namespace:UI.Controls.Button"
+      x:Class="UI.Views.BreakReminderPage"
+      mc:Ignorable="d"
+      d:DesignHeight="720" d:DesignWidth="920"
+      Title="BreakReminderPage"
+      Loaded="Page_Loaded" Unloaded="Page_Unloaded"
+      Foreground="{DynamicResource StandardTextBrush}" Background="Transparent">
+    <Page.Resources>
+        <!-- 卡片：与整体 UI 一致的圆角/背景/边框 -->
+        <Style x:Key="GlassCard" TargetType="Border">
+            <Setter Property="Background" Value="{DynamicResource SettingPanelBgBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource SettingPanelBorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="12"/>
+            <Setter Property="Padding" Value="18"/>
+            <Setter Property="SnapsToDevicePixels" Value="True"/>
+        </Style>
+        <!-- 时长卡片：勾选时主题色描边高亮 -->
+        <Style x:Key="DurationCard" TargetType="Border" BasedOn="{StaticResource GlassCard}">
+            <Setter Property="Padding" Value="18,16"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsWorkEnabled}" Value="True">
+                    <Setter Property="BorderBrush" Value="{DynamicResource ThemeBrush}"/>
+                    <Setter Property="BorderThickness" Value="1.5"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+        <Style x:Key="DurationCardBreak" TargetType="Border" BasedOn="{StaticResource GlassCard}">
+            <Setter Property="Padding" Value="18,16"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsBreakEnabled}" Value="True">
+                    <Setter Property="BorderBrush" Value="{DynamicResource ThemeBrush}"/>
+                    <Setter Property="BorderThickness" Value="1.5"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+        <Style x:Key="PageHint" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="{DynamicResource AppFontSizeSecondary}"/>
+            <Setter Property="Foreground" Value="{DynamicResource SubTextBrush}"/>
+            <Setter Property="TextWrapping" Value="Wrap"/>
+        </Style>
+        <!-- 时长大数字 -->
+        <Style x:Key="DurationNumber" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="34"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="{DynamicResource StandardTextBrush}"/>
+            <Setter Property="TextAlignment" Value="Center"/>
+        </Style>
+        <!-- 时长单位 -->
+        <Style x:Key="DurationUnit" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="{DynamicResource AppFontSizeSecondary}"/>
+            <Setter Property="Foreground" Value="{DynamicResource SubTextBrush}"/>
+            <Setter Property="VerticalAlignment" Value="Bottom"/>
+            <Setter Property="Margin" Value="6,0,0,5"/>
+        </Style>
+        <!-- 步进器按钮 -->
+        <Style x:Key="StepperButton" TargetType="Btn:Button">
+            <Setter Property="Width" Value="30"/>
+            <Setter Property="Height" Value="30"/>
+            <Setter Property="Margin" Value="2"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="FontSize" Value="16"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{DynamicResource StandardTextBrush}"/>
+        </Style>
+        <Style x:Key="StepperValue" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="16"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="TextAlignment" Value="Center"/>
+            <Setter Property="MinWidth" Value="30"/>
+            <Setter Property="Foreground" Value="{DynamicResource StandardTextBrush}"/>
+        </Style>
+        <!-- 套圈水机入口卡片 -->
+        <Style x:Key="RingTossEntry" TargetType="Border">
+            <Setter Property="CornerRadius" Value="14"/>
+            <Setter Property="Background" Value="{DynamicResource SettingPanelBgBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource SettingPanelBorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1.5"/>
+            <Setter Property="Padding" Value="16,18"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="MinHeight" Value="150"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="BorderBrush" Value="{DynamicResource ThemeBrush}"/>
+                    <Setter Property="BorderThickness" Value="2"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        <!-- 阶段徽章 -->
+        <Style x:Key="PhaseBadge" TargetType="Border">
+            <Setter Property="CornerRadius" Value="12"/>
+            <Setter Property="Padding" Value="14,4"/>
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+            <Setter Property="Background" Value="#9E9E9E"/>
+        </Style>
+    </Page.Resources>
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+        <Grid Margin="20,16,20,24">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <!-- 标题区 -->
+            <StackPanel x:Name="HeaderPanel">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="休息提醒" FontSize="{DynamicResource AppFontSizeDisplay}" FontWeight="SemiBold"/>
+                    <Border Margin="12,4,0,0" VerticalAlignment="Center" CornerRadius="10"
+                            Background="{DynamicResource ThemeBrush}" Opacity="0.92"
+                            Padding="10,2">
+                        <TextBlock Text="番茄钟" FontSize="{DynamicResource AppFontSizeCaption}"
+                                   Foreground="White" FontWeight="SemiBold"/>
+                    </Border>
+                </StackPanel>
+                <TextBlock Margin="0,6,0,0" Style="{StaticResource PageHint}"
+                           Text="工作一段时间后提醒休息，或只在你设定的时长结束后提醒。表盘选择分钟，超过 1 小时可用小时步进。"/>
+            </StackPanel>
+
+            <!-- 工作时长 / 休息时长 卡片 -->
+            <Grid x:Name="DurationCards" Grid.Row="1" Margin="0,14,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="16"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- 工作时长 -->
+                <Border Grid.Column="0" Style="{StaticResource DurationCard}">
+                    <StackPanel>
+                        <Grid>
+                            <CheckBox IsChecked="{Binding IsWorkEnabled, Mode=TwoWay}"
+                                      Content="工作时长" FontWeight="SemiBold"
+                                      FontSize="{DynamicResource AppFontSizeBody}"/>
+                            <TextBlock HorizontalAlignment="Right" Style="{StaticResource PageHint}"
+                                       Text="工作结束 → 提醒休息" VerticalAlignment="Center"/>
+                        </Grid>
+
+                        <Border Style="{StaticResource RingTossEntry}" Margin="0,10,0,6"
+                                IsEnabled="{Binding IsWorkEnabled}"
+                                MouseLeftButtonUp="WorkRingTossEntry_Click">
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock Text="套圈水机" HorizontalAlignment="Center" FontWeight="SemiBold"
+                                           FontSize="{DynamicResource AppFontSizeBody}"
+                                           Foreground="{DynamicResource ThemeBrush}"/>
+                                <TextBlock Text="{Binding WorkDurationText}" Style="{StaticResource DurationNumber}" Margin="0,10,0,0"/>
+                                <TextBlock Margin="0,12,0,0" Style="{StaticResource PageHint}" HorizontalAlignment="Center" TextAlignment="Center"
+                                           Text="点击打开 · 左柱 1 圈 = 1 小时&#10;右柱 1 圈 = 10 分钟"/>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </Border>
+
+                <!-- 休息时长 -->
+                <Border Grid.Column="2" Style="{StaticResource DurationCardBreak}">
+                    <StackPanel>
+                        <Grid>
+                            <CheckBox IsChecked="{Binding IsBreakEnabled, Mode=TwoWay}"
+                                      Content="休息时长" FontWeight="SemiBold"
+                                      FontSize="{DynamicResource AppFontSizeBody}"/>
+                            <TextBlock HorizontalAlignment="Right" Style="{StaticResource PageHint}"
+                                       Text="休息结束 → 继续工作" VerticalAlignment="Center"/>
+                        </Grid>
+
+                        <Border Style="{StaticResource RingTossEntry}" Margin="0,10,0,6"
+                                IsEnabled="{Binding IsBreakEnabled}"
+                                MouseLeftButtonUp="BreakRingTossEntry_Click">
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock Text="套圈水机" HorizontalAlignment="Center" FontWeight="SemiBold"
+                                           FontSize="{DynamicResource AppFontSizeBody}"
+                                           Foreground="{DynamicResource ThemeBrush}"/>
+                                <TextBlock Text="{Binding BreakDurationText}" Style="{StaticResource DurationNumber}" Margin="0,10,0,0"/>
+                                <TextBlock Margin="0,12,0,0" Style="{StaticResource PageHint}" HorizontalAlignment="Center" TextAlignment="Center"
+                                           Text="点击打开 · 左柱 1 圈 = 30 分钟&#10;右柱 1 圈 = 5 分钟"/>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </Border>
+            </Grid>
+
+            <!-- 计时控制：环形进度 + 倒计时 + 阶段徽章 -->
+            <Border x:Name="TimerCard" Grid.Row="2" Style="{StaticResource GlassCard}" Margin="0,16,0,0">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- 倒计时圆盘（一柱香）：香的长度 = 剩余时间。香体/燃点/香灰/青烟
+                         全部由 IncenseBurnControl 代码驱动（与主窗口背景共用同一控件） -->
+                    <Grid x:Name="RingHost" Width="228" Height="228">
+                        <!--环境辉光：香头后方的暖色光晕，随燃烧呼吸-->
+                        <Ellipse x:Name="AmbientGlow" Width="150" Height="170"
+                                 HorizontalAlignment="Center" VerticalAlignment="Center"
+                                 IsHitTestVisible="False"/>
+                        <Viewbox Width="228" Height="228" Stretch="Uniform" IsHitTestVisible="False">
+                            <control:IncenseBurnControl x:Name="IncenseBurn"/>
+                        </Viewbox>
+                        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                            <Border x:Name="PhaseBadge" Style="{StaticResource PhaseBadge}">
+                                <TextBlock Text="{Binding PhaseText}" FontSize="{DynamicResource AppFontSizeSecondary}"
+                                           FontWeight="SemiBold" Foreground="White" TextAlignment="Center"/>
+                            </Border>
+                            <TextBlock x:Name="RemainingTextBlock" Text="{Binding RemainingText}"
+                                       Margin="0,8,0,0"
+                                       FontFamily="Segoe UI Light" FontSize="40" FontWeight="Light"
+                                       HorizontalAlignment="Center"
+                                       Foreground="{DynamicResource StandardTextBrush}"/>
+                        </StackPanel>
+                    </Grid>
+
+                    <!-- 模式说明 -->
+                    <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="26,0,18,0">
+                        <TextBlock Text="{Binding ModeText}" Style="{StaticResource PageHint}"
+                                   FontSize="{DynamicResource AppFontSizeBody}" LineHeight="26"/>
+                        <TextBlock Margin="0,10,0,0" Style="{StaticResource PageHint}"
+                                   Text="计时中修改设置会停止计时；休眠期间按真实时间继续走。" />
+                    </StackPanel>
+
+                    <!-- 操作按钮 -->
+                    <StackPanel Grid.Column="2" VerticalAlignment="Center">
+                        <Btn:Button x:Name="StartButton"
+                                    Content="{Binding StartButtonText}"
+                                    Icon="{Binding StartIcon}"
+                                    MinWidth="132" MinHeight="44"
+                                    FontSize="{DynamicResource AppFontSizeBody}"
+                                    Background="{DynamicResource ThemeBrush}"
+                                    Foreground="White"
+                                    Command="{Binding StartPauseCommand}"/>
+                        <Btn:Button Content="重置" MinWidth="96" MinHeight="38" Margin="0,12,0,0"
+                                    Command="{Binding ResetCommand}"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <!-- 提醒记录 -->
+            <Border x:Name="RecordsCard" Grid.Row="3" Style="{StaticResource GlassCard}" Margin="0,16,0,0">
+                <StackPanel>
+                    <Grid>
+                        <TextBlock Text="提醒记录" FontSize="{DynamicResource AppFontSizeBody}" FontWeight="SemiBold"/>
+                        <TextBlock HorizontalAlignment="Right" Style="{StaticResource PageHint}"
+                                   Text="最近 20 条 · 完整台账保存在 Data\BreakReminderRecords.json"/>
+                    </Grid>
+                    <ListBox ItemsSource="{Binding Records}" Margin="0,10,0,0"
+                             MinHeight="96" MaxHeight="140"
+                             BorderThickness="0" Background="Transparent"
+                             ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                             ScrollViewer.VerticalScrollBarVisibility="Auto">
+                        <ListBox.ItemContainerStyle>
+                            <Style TargetType="ListBoxItem">
+                                <Setter Property="Padding" Value="8,6"/>
+                                <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="ListBoxItem">
+                                            <Border x:Name="ItemBorder" CornerRadius="6" Background="Transparent" Padding="{TemplateBinding Padding}">
+                                                <ContentPresenter/>
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter TargetName="ItemBorder" Property="Background"
+                                                            Value="{DynamicResource SettingPanelSpliteLineBrush}"/>
+                                                </Trigger>
+                                                <Trigger Property="IsSelected" Value="True">
+                                                    <Setter TargetName="ItemBorder" Property="Background"
+                                                            Value="{DynamicResource SettingPanelSpliteLineBrush}"/>
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </ListBox.ItemContainerStyle>
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="110"/>
+                                        <ColumnDefinition Width="52"/>
+                                        <ColumnDefinition Width="72"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="{Binding TimeText}" Style="{StaticResource PageHint}"
+                                               VerticalAlignment="Center"/>
+                                    <TextBlock Grid.Column="1" Text="{Binding PhaseText}" VerticalAlignment="Center"
+                                               FontWeight="SemiBold" FontSize="{DynamicResource AppFontSizeSecondary}"/>
+                                    <TextBlock Grid.Column="2" Text="{Binding EventText}" VerticalAlignment="Center"
+                                               FontSize="{DynamicResource AppFontSizeSecondary}"
+                                               Foreground="{DynamicResource ThemeBrush}"/>
+                                    <TextBlock Grid.Column="3" Text="{Binding Note}" Style="{StaticResource PageHint}"
+                                               VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+                                </Grid>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </StackPanel>
+            </Border>
+        </Grid>
+    </ScrollViewer>
+</Page>

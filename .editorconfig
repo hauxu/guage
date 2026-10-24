@@ -1,0 +1,29 @@
+# 更矩 (guage) 编辑器约定
+root = true
+
+[*]
+charset = utf-8
+end_of_line = crlf
+insert_final_newline = true
+indent_style = space
+indent_size = 4
+
+# 约定说明：
+# - 现有源文件：UTF-8（无 BOM）
+# - 新增源文件：UTF-8 带 BOM（避免编译器编码探测歧义，见 docs/break-reminder/开发交接文档.md）
+#   在 Visual Studio 中保存时选择“使用编码保存”并勾选 Unicode (UTF-8 with signature)
+
+[*.cs]
+indent_size = 4
+
+[*.xaml]
+indent_size = 4
+
+[*.json]
+indent_size = 2
+
+[*.js]
+indent_size = 4
+
+[*.md]
+trim_trailing_whitespace = false

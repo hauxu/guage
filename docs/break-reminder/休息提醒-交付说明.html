@@ -1,0 +1,198 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>休息提醒（番茄钟）功能交付说明 — Guage</title>
+<style>
+  :root {
+    --ink: #1a1a1a; --sub: #4f4f4f; --line: #e5e5e5;
+    --accent: #8080ff; --bg: #ffffff; --bg2: #f7f7f9;
+    --ok: #1a7f37; --warn: #9a6700; --bad: #cf222e;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: "Segoe UI", "Microsoft YaHei", sans-serif; color: var(--ink); background: var(--bg2); line-height: 1.65; }
+  .wrap { max-width: 980px; margin: 0 auto; padding: 40px 24px 80px; }
+  header.hero { background: var(--bg); border: 1px solid var(--line); border-radius: 14px; padding: 32px 36px; margin-bottom: 28px; }
+  header.hero h1 { font-size: 28px; font-weight: 700; }
+  header.hero .tag { display: inline-block; margin-top: 10px; background: var(--accent); color: #fff; border-radius: 999px; padding: 2px 14px; font-size: 13px; }
+  header.hero p { color: var(--sub); margin-top: 10px; font-size: 14px; }
+  section { background: var(--bg); border: 1px solid var(--line); border-radius: 14px; padding: 26px 32px; margin-bottom: 24px; }
+  h2 { font-size: 19px; margin-bottom: 16px; padding-bottom: 10px; border-bottom: 2px solid var(--accent); }
+  h3 { font-size: 15px; margin: 18px 0 8px; }
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; margin: 10px 0 6px; }
+  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { background: var(--bg2); font-weight: 600; white-space: nowrap; }
+  .ok { color: var(--ok); font-weight: 600; white-space: nowrap; }
+  .bad { color: var(--bad); font-weight: 600; }
+  .note { background: #f0f0ff; border-left: 4px solid var(--accent); padding: 10px 14px; border-radius: 0 8px 8px 0; font-size: 13.5px; margin: 12px 0; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 14px 0; }
+  .card { border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; }
+  .card .t { font-weight: 600; font-size: 14px; margin-bottom: 6px; }
+  .card .d { font-size: 13px; color: var(--sub); }
+  .badge { display: inline-block; border-radius: 6px; padding: 1px 10px; font-size: 12px; font-weight: 600; margin-right: 6px; }
+  .b-blue { background: #e8e8ff; color: #4a4aff; }
+  .b-green { background: #e4f5e9; color: var(--ok); }
+  .b-gray { background: #f0f0f0; color: var(--sub); }
+  figure { margin: 16px 0; }
+  figure img { width: 100%; border: 1px solid var(--line); border-radius: 10px; }
+  figcaption { font-size: 12.5px; color: var(--sub); margin-top: 6px; text-align: center; }
+  ul, ol { padding-left: 22px; font-size: 13.5px; }
+  li { margin: 4px 0; }
+  code { background: #f2f2f4; border-radius: 4px; padding: 1px 6px; font-size: 12.5px; font-family: Consolas, monospace; }
+  .footer { text-align: center; color: var(--sub); font-size: 12.5px; margin-top: 10px; }
+  @media (max-width: 720px) { .grid2 { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="hero">
+  <h1>休息提醒（番茄钟）功能交付说明</h1>
+  <span class="tag">Guage · WPF · .NET Framework 4.8</span>
+  <p>在保留原有统计/限制功能与全部页面不变的前提下，左侧导航栏新增「休息提醒」Tab：表盘式时长选择 + 工作/休息循环计时 + 系统提醒 + 配置与台账持久化；v2 完成界面 UI 优化（与整体风格统一 + 苹果风格动画）。本文档汇总功能说明、实现要点与验证结果。</p>
+</header>
+
+<section>
+  <h2>一、功能概览</h2>
+  <div class="grid2">
+    <div class="card">
+      <div class="t">🕐 表盘时长选择</div>
+      <div class="d">谷歌时钟风格圆形表盘，60 刻度 + 数字标注，点击/拖动选分钟（0-59）；超过 1 小时用「小时」步进器（0-12），最长 12 小时 59 分。</div>
+    </div>
+    <div class="card">
+      <div class="t">☑ 两种模式</div>
+      <div class="d">工作时长+休息时长双勾选 = 工作→休息→工作循环；仅勾选工作时长 = 只在工作结束后提醒一次。另支持仅休息模式。</div>
+    </div>
+    <div class="card">
+      <div class="t">🔔 阶段提醒</div>
+      <div class="d">置顶弹窗（区分"该休息了"/"休息结束"文案）+ 托盘系统通知，应用在后台也能收到；休眠唤醒后补提醒并记录。</div>
+    </div>
+    <div class="card">
+      <div class="t">💾 持久化</div>
+      <div class="d">设置存 <code>Data\AppConfig.json</code>（BreakReminder 节），提醒台账存 <code>Data\BreakReminderRecords.json</code>（最多 200 条），重启保留。</div>
+    </div>
+  </div>
+  <div class="note">设计遵循功能主义网格：表盘刻度严格 6° 等分、双色表达（主题色 + 中性色）、数字每 5 分钟标注，与软件现有主题资源（ThemeBrush/StandardTextBrush 等）一致。</div>
+</section>
+
+<section>
+  <h2>一·五、UI 优化（v2）</h2>
+  <div class="grid2">
+    <div class="card">
+      <div class="t">🎯 布局重构</div>
+      <div class="d">表盘放大居中（150px）、步进器圆角容器、34px 大号时长数字、标题"番茄钟"徽章、卡片勾选态主题色描边，与整体 UI 视觉语言统一。</div>
+    </div>
+    <div class="card">
+      <div class="t">🍎 苹果风格动画</div>
+      <div class="d">页面入场逐卡弹性滑入（stagger 40ms）、表盘弧线平滑过渡（AppleDecelerate）、环形进度平滑转动、阶段切换环/徽章颜色过渡（紫↔苹果绿）、倒计时数字弹性缩放与每秒微脉冲；全部内置减动效降级。</div>
+    </div>
+  </div>
+  <figure>
+    <img src="assets/page-v2.png" alt="休息提醒页面 v2">
+    <figcaption>v2 页面：表盘居中放大 + 环形进度 + 胶囊徽章 + 细体大倒计时 + 主题色主按钮</figcaption>
+  </figure>
+  <figure>
+    <img src="assets/ring-progress.png" alt="环形进度">
+    <figcaption>计时中：环形进度弧随剩余时间平滑减少（实测 358°→204°→30°，与剩余时间精确对应）</figcaption>
+  </figure>
+  <figure>
+    <img src="assets/popup-v2.png" alt="提醒弹窗">
+    <figcaption>提醒弹窗（v2 固定中性配色，任何主题下稳定显示）</figcaption>
+  </figure>
+</section>
+<section>
+  <h2>二、页面效果</h2>
+  <figure>
+    <img src="assets/page.png" alt="休息提醒页面">
+    <figcaption>休息提醒页面：两个表盘卡片（工作 25 分钟 / 休息 5 分钟）+ 计时控制卡 + 提醒记录卡</figcaption>
+  </figure>
+  <figure>
+    <img src="assets/nav.png" alt="左侧导航">
+    <figcaption>左侧导航栏：新增「休息提醒」位于"时长限制"与"设置"之间（第 6 项，提醒图标）</figcaption>
+  </figure>
+  <figure>
+    <img src="assets/popup.png" alt="提醒弹窗">
+    <figcaption>阶段完成提醒弹窗（置顶小窗）：标题"该休息了" + 说明 + 知道了/关闭</figcaption>
+  </figure>
+</section>
+
+<section>
+  <h2>三、使用说明（摘要）</h2>
+  <h3>时长设置</h3>
+  <ul>
+    <li>表盘选择 0-59 分钟；<strong>超过 1 小时</strong>用卡片右侧「小时」步进器（− / +），总时长 = 小时 × 60 + 分钟，如 90 分钟 = 1 小时 + 30 分。</li>
+    <li>设置实时保存；重启后保留。</li>
+  </ul>
+  <h3>两种模式</h3>
+  <table>
+    <tr><th>勾选</th><th>模式</th><th>行为</th></tr>
+    <tr><td>工作 + 休息</td><td>循环模式</td><td>工作 → 提醒"该休息了" → 自动休息 → 提醒"休息结束" → 回到工作，循环</td></tr>
+    <tr><td>仅工作</td><td>仅提醒模式</td><td>工作结束后提醒一次，不进入休息，计时停止</td></tr>
+    <tr><td>仅休息</td><td>仅休息模式</td><td>从休息阶段开始，结束后提醒一次</td></tr>
+    <tr><td>都不勾选</td><td>无法开始</td><td>红色提示"请至少勾选工作时长或休息时长"</td></tr>
+  </table>
+  <h3>计时控制</h3>
+  <ul>
+    <li>开始计时 → 暂停/继续/重置；阶段完成自动切换并提醒。</li>
+    <li>计时中修改设置会停止计时并提示（保证行为可预期）。</li>
+    <li>休眠期间按墙钟继续走，唤醒后补提醒并标注"休眠期间到期"。</li>
+  </ul>
+  <p>完整说明见 <a href="使用说明-休息提醒.md">使用说明-休息提醒.md</a>。</p>
+</section>
+
+<section>
+  <h2>四、验证结果</h2>
+  <h3>Core 计时逻辑（反射测试台）</h3>
+  <table>
+    <tr><th>用例</th><th>结果</th></tr>
+    <tr><td>双勾选开始→Work；工作完成→Break；休息完成→回 Work（循环）</td><td class="ok">✅ 通过</td></tr>
+    <tr><td>仅工作模式完成后→Idle；仅休息模式从 Break 开始</td><td class="ok">✅ 通过</td></tr>
+    <tr><td>都未勾选→抛 InvalidOperationException</td><td class="ok">✅ 通过</td></tr>
+    <tr><td>暂停冻结剩余时间 / 继续恢复递减</td><td class="ok">✅ 通过</td></tr>
+    <tr><td>休眠期间不完成阶段；唤醒后补完成并标记休眠到期</td><td class="ok">✅ 通过</td></tr>
+    <tr><td>台账持久化（Start/Complete/Pause/Resume/Sleep/WakeElapsed）</td><td class="ok">✅ 通过</td></tr>
+    <tr><td>0/负数时长兜底为 1 分钟</td><td class="ok">✅ 通过</td></tr>
+  </table>
+  <p class="note">合计 <strong>29/29 断言通过</strong>（测试台 <code>.cluster/break-reminder-tmp/tests/BreakReminderCoreTest.cs</code>，临时工程未入项目源码）。</p>
+
+  <h3>UI 实机验证（坐标点击 + UIA 断言 + 截图）</h3>
+  <table>
+    <tr><th>检查项</th><th>结果</th></tr>
+    <tr><td>导航出现"休息提醒"Tab，点击进入页面</td><td class="ok">✅</td></tr>
+    <tr><td>表盘渲染与点击选值（25→1 分钟，含小时组合 1 小时 1 分）</td><td class="ok">✅</td></tr>
+    <tr><td>一小时以上时长设置（1 小时 25 分钟，配置 WorkMinutes=85）</td><td class="ok">✅</td></tr>
+    <tr><td>开始→工作中+倒计时；暂停冻结；继续恢复</td><td class="ok">✅</td></tr>
+    <tr><td>1 分钟工作计时结束→弹窗"该休息了"+自动进入休息</td><td class="ok">✅</td></tr>
+    <tr><td>全取消勾选点开始→红色 toast"请至少勾选工作时长或休息时长"</td><td class="ok">✅</td></tr>
+    <tr><td>配置持久化：重启后设置保留；台账 JSON 时间线正确</td><td class="ok">✅</td></tr>
+    <tr><td>原功能回归：首页/统计/详细/分类/时长限制/设置 6 页全部正常</td><td class="ok">✅</td></tr>
+    <tr><td>原配置数据无损（TimeLimit 4 条规则保留，仅新增 BreakReminder 节）</td><td class="ok">✅</td></tr>
+  </table>
+
+  <h3>构建</h3>
+  <table>
+    <tr><th>配置</th><th>产物</th><th>结果</th></tr>
+    <tr><td>Debug</td><td><code>UI\bin\Debug\guage.exe</code>（1,457,152 B）</td><td class="ok">✅ 无错误</td></tr>
+    <tr><td>Release</td><td><code>UI\bin\Release\guage.exe</code>（1,340,928 B）</td><td class="ok">✅ 无错误</td></tr>
+  </table>
+</section>
+
+<section>
+  <h2>五、关键文件</h2>
+  <table>
+    <tr><th>文件</th><th>职责</th></tr>
+    <tr><td><code>Core\Servicers\Instances\BreakReminderServicer.cs</code></td><td>计时引擎（1s 心跳 + 墙钟目标时间，休眠补偿，台账）</td></tr>
+    <tr><td><code>UI\Controls\BreakReminderDial.cs</code></td><td>表盘控件（自绘刻度/数字/选中弧，点击拖动选分钟）</td></tr>
+    <tr><td><code>UI\ViewModels\BreakReminderPageVM.cs</code></td><td>页面 VM（设置校验、模式、计时状态、台账展示）</td></tr>
+    <tr><td><code>UI\Views\BreakReminderPage.xaml</code></td><td>页面布局（两张表盘卡片 + 计时卡 + 记录卡）</td></tr>
+    <tr><td><code>UI\Servicers\BreakReminderNotifierServicer.cs</code></td><td>阶段完成监听：弹窗 + 托盘气泡</td></tr>
+    <tr><td><code>Core\Models\Config\BreakReminderModel.cs</code></td><td>配置节模型</td></tr>
+  </table>
+  <p>完整清单（新增 10 文件 + 修改 8 文件）、配置格式、构建与回滚方式见 <a href="开发交接文档.md">开发交接文档.md</a>；逐项测试记录见 <a href="回归验证清单.md">回归验证清单.md</a>。</p>
+</section>
+
+<div class="footer">Guage · 休息提醒功能交付 · 2026-08-12</div>
+</div>
+</body>
+</html>

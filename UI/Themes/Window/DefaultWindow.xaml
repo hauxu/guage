@@ -1,0 +1,365 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:w="clr-namespace:UI.Controls.Window" xmlns:button="clr-namespace:UI.Controls.Button"
+                    xmlns:base="clr-namespace:UI.Controls.Base"
+                    xmlns:input="clr-namespace:UI.Controls.Input"
+                    xmlns:anim="clr-namespace:UI.Base.Animation">
+    <Style x:Key="WindowSystemButton" TargetType="{x:Type Button}">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="OverridesDefaultStyle" Value="True"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+        <Setter Property="HorizontalContentAlignment" Value="Center"/>
+        <Setter Property="FontFamily" Value="/guage;component/Resources/Fonts/#Segoe MDL2 Assets"/>
+        <Setter Property="Foreground" Value="{DynamicResource TitleBarBtnBrush}"/>
+        <!--<Setter Property="FontWeight" Value="Bold"/>-->
+        <Setter Property="FontSize" Value="10"/>
+
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type Button}">
+                    <Border 
+                        Background="{TemplateBinding Background}"
+                                        SnapsToDevicePixels="true">
+                        <ContentPresenter Name="Presenter" Margin="{TemplateBinding Padding}"
+                                          VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                          HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                          RecognizesAccessKey="True"
+                                          SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsEnabled" Value="false">
+                            <!--<Setter Property="Foreground" Value="{DynamicResource ButtonTextDisabled}"/>-->
+                        </Trigger>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="Background" Value="{DynamicResource HoverBackgroundBrush}" />
+                            <Setter Property="Foreground" Value="{DynamicResource PrimaryColorBrush}"/>
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter Property="Background" Value="{DynamicResource ThemeBrush}" />
+                            <!--<Setter Property="Background" Value="{DynamicResource ButtonBackgroundPressed}" />
+                            <Setter Property="BorderBrush" Value="{DynamicResource ButtonBorderPressed}"/>-->
+                            <Setter Property="Foreground" Value="White"/>
+                        </Trigger>
+                        <Trigger Property="IsFocused" Value="true">
+                            <!--<Setter TargetName="Chrome" Property="BorderBrush" Value="{DynamicResource Accent}" />-->
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+    <Style  TargetType="{x:Type w:DefaultWindow}">
+        <!--<Setter Property="BorderThickness" Value="1" />-->
+        <!--<Setter Property="BorderBrush" Value="{DynamicResource WindowBorderBrush}" />-->
+        <Setter Property="Background" Value="Transparent" />
+        <!--AllowsTransparency（layered 窗口）：圆角由 WPF 渲染任意半径（DWM 三档平台限制的解法），
+            强制要求 WindowStyle=None；系统阴影消失，由模板内九宫格自绘阴影替代-->
+        <Setter Property="WindowStyle" Value="None" />
+        <Setter Property="AllowsTransparency" Value="True" />
+        <!--<Setter Property="Logo" Value="{DynamicResource WindowLogo}" />-->
+        <Setter Property="Foreground" Value="{DynamicResource StandardTextBrush}" />
+
+        <Setter Property="ResizeMode" Value="CanResizeWithGrip" />
+        <Setter Property="UseLayoutRounding" Value="True" />
+        <Setter Property="TextOptions.TextFormattingMode" Value="Display"/>
+        <Setter Property="WindowChrome.WindowChrome">
+            <Setter.Value>
+                <!--GlassFrameThickness 必须为 0。取 -1 会把 DWM 边框延伸进客户区，
+                    导致系统自绘的标题栏按钮与下面自定义的那套错位重叠。
+                    毛玻璃由 WindowBackdrop 通过窗口合成属性实现，不依赖边框延伸-->
+                <WindowChrome 
+                    CaptionHeight="32"
+                    CornerRadius="0" GlassFrameThickness="0" UseAeroCaptionButtons="False" NonClientFrameEdges="None" />
+            </Setter.Value>
+        </Setter>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type w:DefaultWindow}">
+                    <ControlTemplate.Resources>
+
+                        <!-- 窗口加载：轻微缩放弹出 + 淡入（弹性开屏） -->
+                        <Storyboard x:Key="Storyboardload">
+                            <DoubleAnimation Storyboard.TargetName="WindowScale" Storyboard.TargetProperty="ScaleX" Duration="00:00:0.32" From="0.98" To="1">
+                                <DoubleAnimation.EasingFunction>
+                                    <anim:SpringEase Bounce="0.35" EasingMode="EaseOut"/>
+                                </DoubleAnimation.EasingFunction>
+                            </DoubleAnimation>
+                            <DoubleAnimation Storyboard.TargetName="WindowScale" Storyboard.TargetProperty="ScaleY" Duration="00:00:0.32" From="0.98" To="1">
+                                <DoubleAnimation.EasingFunction>
+                                    <anim:SpringEase Bounce="0.35" EasingMode="EaseOut"/>
+                                </DoubleAnimation.EasingFunction>
+                            </DoubleAnimation>
+                            <DoubleAnimation Storyboard.TargetName="WindowBorder" Storyboard.TargetProperty="Opacity" Duration="00:00:0.2" From="0" To="1"/>
+                        </Storyboard>
+
+                    </ControlTemplate.Resources>
+                    <!--  layered 窗口命中托底：玻璃模式下窗口表面大部分像素 alpha=0，
+                          而分层窗口按像素 alpha 命中——alpha=0 区域点击会穿透到后面的窗口
+                          （表现为"一点击就切到后台"）。alpha=1 的底色肉眼不可见但让全窗可命中 -->
+                    <Border x:Name="WindowBorder" RenderTransformOrigin="0.5,0.5" Background="#01000000">
+                        <Border.RenderTransform>
+                            <ScaleTransform x:Name="WindowScale" ScaleX="1" ScaleY="1"/>
+                        </Border.RenderTransform>
+                        <!-- 不再留 WindowNonClientFrameThickness 外边距：GlassFrameThickness=0 时
+                            客户区已覆盖整窗，留边会露出未绘制的黑框（配合 DWM 圆角更明显） -->
+                        <Border
+                            x:Name="RootBorder"
+                            BorderThickness="1"
+                                BorderBrush="{DynamicResource WindowBorderBrush}"
+                                Background="{DynamicResource WindowBackground}"
+                                CornerRadius="0"
+                                ClipToBounds="True"
+                                Padding="0.5"
+                                >
+                            <!--Padding 0.5：描边内收，避开 DWM 系统圆角在角部裁切 1px 描边线-->
+                            <AdornerDecorator>
+                                <Grid x:Name="WindowContent">
+
+                                    <!--<Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"></RowDefinition>
+                                        <RowDefinition Height="*"></RowDefinition>
+
+                                    </Grid.RowDefinitions>-->
+
+                                    <!--标题栏-->
+                                    <Grid 
+                                        x:Name="TitleBar"
+                                        Panel.ZIndex="999"
+                                        Height="{DynamicResource WindowTitleBarHeight}"
+                                        VerticalAlignment="Top">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto"></ColumnDefinition>
+                                            <ColumnDefinition Width="*"></ColumnDefinition>
+
+                                        </Grid.ColumnDefinitions>
+
+                                        <Grid Grid.Column="0"
+                                              Panel.ZIndex="3">
+                                            <!--标题区域-->
+                                            <StackPanel Orientation="Horizontal" Margin="15,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Center">
+
+                                                <button:IconButton Width="0" VerticalAlignment="Center" ToolTip="返回" FontSize="10" x:Name="BackBtn" Icon="Back"  WindowChrome.IsHitTestVisibleInChrome="True" Command="{x:Static w:DefaultWindowCommands.BackCommand}"/>
+
+                                                <Image Source="{TemplateBinding Icon}" VerticalAlignment="Center" Stretch="Uniform" Width="18"/>
+                                                <TextBlock VerticalAlignment="Center" Text="{TemplateBinding Title}" IsEnabled="{TemplateBinding IsActive}" Foreground="{DynamicResource DefaultTextBrush}" Margin="15,0,0,0"/>
+                                            </StackPanel>
+
+
+                                        </Grid>
+                                        <Grid Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Top"
+                                              WindowChrome.IsHitTestVisibleInChrome="True"
+                                              Panel.ZIndex="3">
+                                            <!--系统按钮区域-->
+
+                                            <StackPanel Orientation="Horizontal">
+                                                <!--最小化-->
+                                                <button:IconButton
+                                                    ToolTip="最小化"
+                                                    Width="46"
+                                                    Height="32"
+                                                    FontSize="10"
+                                                    Icon="ChromeMinimize"
+                                                    Command="{x:Static w:DefaultWindowCommands.MinimizeWindowCommand}"
+                                                    Visibility="{TemplateBinding MinimizeVisibility}"/>
+
+                                                <!--最大化-->
+                                                <button:IconButton
+                                                    x:Name="MaximizeButton"
+                                                    ToolTip="最大化"
+                                                    Width="46"
+                                                    Height="32"
+                                                    FontSize="10"
+                                                    Icon="ChromeMaximize"
+                                                    Command="{x:Static w:DefaultWindowCommands.MaximizeWindowCommand}"
+                                                    Visibility="{TemplateBinding MaximizeVisibility}"/>
+                                                <!--还原-->
+                                                <button:IconButton
+                                                    x:Name="RestoreButton"
+                                                    ToolTip="向下还原"
+                                                    Width="46"
+                                                    Height="32"
+                                                    FontSize="10"
+                                                    Icon="ChromeRestore"
+                                                    Command="{x:Static w:DefaultWindowCommands.RestoreWindowCommand}"
+                                                    Visibility="Collapsed"/>
+                                                <!--关闭-->
+                                                <button:IconButton
+                                                    ToolTip="关闭"
+                                                    Width="46"
+                                                    Height="32"
+                                                    FontSize="10"
+                                                    Icon="ChromeClose"
+                                                    Command="{x:Static w:DefaultWindowCommands.CloseWindowCommand}"
+                                                    Visibility="{TemplateBinding CloseVisibility}"/>
+
+                                            </StackPanel>
+
+
+                                        </Grid>
+                                    </Grid>
+
+
+
+                                    <!--窗体内容-->
+                                    <ContentPresenter Grid.Row="1"/>
+                                    <!--提醒框-->
+                                    <Grid Panel.ZIndex="999" x:Name="ToastGrid" Visibility="Collapsed">
+                                        <!--内容。基础背景走 Style 而非本地值：模板触发器的优先级低于本地值，
+                                            写在本地会让 Success/Error 的彩色背景永远不生效-->
+                                        <Border
+                                            Padding="15,15"
+                                            CornerRadius="12"
+                                            MaxWidth="320"
+                                            x:Name="ToastBorder" HorizontalAlignment="Center" VerticalAlignment="Top" Panel.ZIndex="99999">
+                                            <Border.Style>
+                                                <Style TargetType="Border">
+                                                    <Setter Property="Background" Value="{DynamicResource DialogPanelBrush}"/>
+                                                </Style>
+                                            </Border.Style>
+                                            <Border.RenderTransform>
+                                                <TransformGroup>
+                                                    <TranslateTransform Y="-150"/>
+                                                </TransformGroup>
+                                            </Border.RenderTransform>
+                                            <Border.Effect>
+                                                <DropShadowEffect BlurRadius="10" Color="Black" Opacity=".1"/>
+                                            </Border.Effect>
+                                            <Grid >
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="30"/>
+                                                    <ColumnDefinition Width="*"/>
+
+                                                </Grid.ColumnDefinitions>
+                                                <base:Icon IconType="{TemplateBinding ToastIcon}" VerticalAlignment="Top" Margin="0,0,10,0" x:Name="ToastIcon"/>
+                                                <TextBlock x:Name="ToastText" Grid.Column="1" Text="{TemplateBinding ToastContent}" VerticalAlignment="Top" TextWrapping="WrapWithOverflow"/>
+                                            </Grid>
+                                        </Border>
+                                        <!--Dialog-->
+                                        <Border 
+     Padding="15,15"
+     CornerRadius="10"
+     Width="300"
+     x:Name="DialogBorder" Background="{DynamicResource DialogPanelBrush}" HorizontalAlignment="Center" VerticalAlignment="Top" Panel.ZIndex="1000">
+                                            <Border.RenderTransform>
+                                                <TransformGroup>
+                                                    <TranslateTransform Y="-150"/>
+                                                </TransformGroup>
+                                            </Border.RenderTransform>
+                                            <Border.Effect>
+                                                <DropShadowEffect BlurRadius="10" Color="Black" Opacity=".1"/>
+                                            </Border.Effect>
+                                            <Grid >
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="40"/>
+                                                    <RowDefinition Height="auto"/>
+                                                    <RowDefinition Height="auto"/>
+                                                </Grid.RowDefinitions>
+                                                <TextBlock Text="{TemplateBinding DialogTitle}" FontSize="16" FontWeight="Bold"/>
+                                                <TextBlock Grid.Row="1" Text="{TemplateBinding DialogMessage}" VerticalAlignment="Top" TextWrapping="WrapWithOverflow"/>
+                                                <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
+                                                    <button:Button x:Name="CancelBtn" Width="100">取消</button:Button>
+                                                    <button:Button x:Name="ConfirmBtn" Background="{DynamicResource ThemeBrush}" Foreground="White" Width="100" Margin="10,0,0,0">确定</button:Button>
+                                                </StackPanel>
+                                            </Grid>
+                                        </Border>
+                                        <!--Dialog-->
+                                        <Border 
+     Padding="15,15"
+     CornerRadius="10"
+     Width="350"
+     x:Name="InputModalBorder" Background="{DynamicResource DialogPanelBrush}" HorizontalAlignment="Center" VerticalAlignment="Top" Panel.ZIndex="1000">
+                                            <Border.RenderTransform>
+                                                <TransformGroup>
+                                                    <TranslateTransform Y="-150"/>
+                                                </TransformGroup>
+                                            </Border.RenderTransform>
+                                            <Border.Effect>
+                                                <DropShadowEffect BlurRadius="10" Color="Black" Opacity=".1"/>
+                                            </Border.Effect>
+                                            <Grid >
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="40"/>
+                                                    <RowDefinition Height="auto"/>
+                                                    <RowDefinition Height="auto"/>
+                                                </Grid.RowDefinitions>
+                                                <TextBlock Text="{TemplateBinding DialogTitle}" FontSize="16" FontWeight="Bold"/>
+                                                <Border Grid.Row="1">
+                                                    <input:InputBox x:Name="InputModalInputBox" Placeholder="{TemplateBinding DialogMessage}"></input:InputBox>
+                                                </Border>
+                                                <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
+                                                    <button:Button x:Name="InputModalCancelBtn" Width="100">取消</button:Button>
+                                                    <button:Button x:Name="InputModalConfirmBtn" Background="{DynamicResource ThemeBrush}" Foreground="White" Width="100" Margin="10,0,0,0">确定</button:Button>
+                                                </StackPanel>
+                                            </Grid>
+                                        </Border>
+                                        <!--遮罩层-->
+                                        <Border x:Name="Masklayer" Background="Black" Opacity="0"></Border>
+                                    </Grid>
+                                </Grid>
+                            </AdornerDecorator>
+                        </Border>
+                        <VisualStateManager.VisualStateGroups>
+                            <VisualStateGroup x:Name="CommonStates">
+                                <VisualStateGroup.Transitions>
+                                    <VisualTransition GeneratedDuration="0:0:.15" />
+                                    <VisualTransition GeneratedDuration="0"
+                                  To="Pressed" />
+                                </VisualStateGroup.Transitions>
+                                <VisualState x:Name="Normal" />
+                                <VisualState x:Name="CanBackState">
+                                    <Storyboard >
+                                        <DoubleAnimation Storyboard.TargetProperty="(Button.Width)"
+                                                Storyboard.TargetName="BackBtn" To="35" Duration="0:0:.1">
+                                        </DoubleAnimation>
+                                    </Storyboard>
+                                </VisualState>
+
+                            </VisualStateGroup>
+                        </VisualStateManager.VisualStateGroups>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="ToastType" Value="Success">
+                            <Setter TargetName="ToastBorder" Property="Background" Value="#24bf5f" />
+                            <Setter TargetName="ToastIcon" Property="Foreground" Value="#fff" />
+                            <Setter TargetName="ToastText" Property="Foreground" Value="#fff" />
+                        </Trigger>
+                        <Trigger Property="ToastType" Value="Error">
+                            <Setter TargetName="ToastBorder" Property="Background" Value="#f54f4e" />
+                            <Setter TargetName="ToastIcon" Property="Foreground" Value="#fff" />
+                            <Setter TargetName="ToastText" Property="Foreground" Value="#fff" />
+                        </Trigger>
+                        <MultiTrigger>
+                            <MultiTrigger.Conditions>
+                                <Condition Property="WindowState" Value="Normal" />
+                                <Condition Property="MaximizeVisibility" Value="Visible" />
+                            </MultiTrigger.Conditions>
+                            <Setter TargetName="MaximizeButton" Property="Visibility" Value="Visible" />
+                            <Setter TargetName="RestoreButton" Property="Visibility" Value="Collapsed" />
+                        </MultiTrigger>
+                        <Trigger Property="WindowState" Value="Maximized">
+                            <!--最大化时调整外边距，否则显示不完整；圆角归直角（代码同步）-->
+                            <Setter TargetName="WindowContent" Property="Margin" Value="7"/>
+                            <Setter TargetName="MaximizeButton" Property="Visibility" Value="Collapsed" />
+                            <Setter TargetName="RestoreButton" Property="Visibility" Value="Visible" />
+                        </Trigger>
+                        <!--<Trigger Property="IsCanBack" Value="True">
+                            <Setter TargetName="BackBtn" Property="Visibility" Value="Visible" />
+                        </Trigger>-->
+                        <!--<Trigger Property="WindowState" Value="Normal">
+                            <Setter TargetName="MaximizeButton" Property="Visibility" Value="Visible" />
+                            <Setter TargetName="RestoreButton" Property="Visibility" Value="Collapsed" />
+                        </Trigger>-->
+                        <EventTrigger RoutedEvent="Window.Loaded">
+                            <!--窗口载入动画-->
+                            <BeginStoryboard Storyboard="{StaticResource Storyboardload}">
+                            </BeginStoryboard>
+                        </EventTrigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+
+    </Style>
+
+
+</ResourceDictionary>

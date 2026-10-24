@@ -1,0 +1,49 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="/guage;component/Themes/Window/HideWindow.xaml" />
+        <ResourceDictionary Source="/guage;component/Themes/Window/DefaultWindow.xaml" />
+        <ResourceDictionary Source="/guage;component/Themes/Navigation/NavigationItem.xaml"/>
+        <ResourceDictionary Source="/guage;component/Themes/Navigation/Navigation.xaml"/>
+        <ResourceDictionary Source="/guage;component/Themes/Base/Icon.xaml"/>
+        <ResourceDictionary Source="/guage;component/Themes/Base/Placeholder.xaml"/>
+        <ResourceDictionary Source="/guage;component/Themes/Base/EmptyData.xaml"/>
+        <ResourceDictionary Source="/guage;component/Themes/Base/Img.xaml"/>
+        <ResourceDictionary Source="/guage;component/Themes/Base/CheckBox.xaml"/>
+        <ResourceDictionary Source="/guage;component/Themes/Base/Text.xaml"/>
+        <ResourceDictionary Source="/guage;component/Themes/Base/View.xaml"/>
+        <ResourceDictionary Source="/guage;component/Themes/Base/IconSelect.xaml"/>
+        <ResourceDictionary Source="/guage;component/Themes/Base/ColorSelect.xaml"/>
+
+        <ResourceDictionary Source="/guage;component/Themes/TPage.xaml"/>
+        <ResourceDictionary Source="/guage;component/Themes/PageContainer.xaml"/>
+        <ResourceDictionary Source="/guage;component/Themes/Charts/Charts.xaml"/>
+        <ResourceDictionary Source="/guage;component/Themes/Charts/ChartsItemTypeList.xaml"/>
+        <ResourceDictionary Source="/guage;component/Themes/Charts/ChartsItemTypeCard.xaml"/>
+        <ResourceDictionary Source="/guage;component/Themes/Charts/ChartsItemTypeMonth.xaml"/>
+        <ResourceDictionary Source="/guage;component/Themes/Charts/ChartsItemTypeColumn.xaml"/>
+        <ResourceDictionary Source="/guage;component/Themes/Charts/ChartsItemTypeRadar.xaml"/>
+
+        <ResourceDictionary Source="/guage;component/Themes/Tabbar/Tabbar.xaml"/>
+        <ResourceDictionary Source="/guage;component/Themes/DatePickerBar/DatePickerBar.xaml"/>
+        <ResourceDictionary Source="/guage;component/Themes/DatePickerBar/DatePickerBarItem.xaml"/>
+        <ResourceDictionary Source="/guage;component/Themes/SettingPanel/SettingPanel.xaml"/>
+        <ResourceDictionary Source="/guage;component/Themes/Toggle/Toggle.xaml"/>
+        <ResourceDictionary Source="/guage;component/Themes/SettingPanel/SettingPanelItem.xaml"/>
+        <ResourceDictionary Source="/guage;component/Themes/SettingPanel/SettingPanelMultiItem.xaml"/>
+        <ResourceDictionary Source="/guage;component/Themes/Input/InputBox.xaml"/>
+        <ResourceDictionary Source="/guage;component/Themes/Input/SliderInput.xaml"/>
+        <ResourceDictionary Source="/guage;component/Themes/Button/IconButton.xaml"/>
+        <ResourceDictionary Source="/guage;component/Themes/Button/Button.xaml"/>
+        <ResourceDictionary Source="/guage;component/Themes/List/BaseList.xaml"/>
+        <ResourceDictionary Source="/guage;component/Themes/List/BaseListItem.xaml"/>
+
+        <ResourceDictionary Source="/guage;component/Themes/Select/Select.xaml"/>
+        <ResourceDictionary Source="/guage;component/Themes/Select/Option.xaml"/>
+        <ResourceDictionary Source="/guage;component/Themes/Select/ImageSelect.xaml"/>
+        <ResourceDictionary Source="/guage;component/Themes/Select/DateSelect.xaml"/>
+        <ResourceDictionary Source="/guage;component/Themes/Expander/Expander.xaml"/>
+
+    </ResourceDictionary.MergedDictionaries>
+
+</ResourceDictionary>

@@ -1,0 +1,45 @@
+﻿<Window x:Class="UI.Controls.Window.BreakReminderWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:base="clr-namespace:UI.Controls.Base"
+        xmlns:Btn="clr-namespace:UI.Controls.Button"
+        mc:Ignorable="d"
+        Title="休息提醒"
+        Width="380" SizeToContent="Height"
+        WindowStyle="ToolWindow" ResizeMode="NoResize"
+        ShowInTaskbar="False" Topmost="True"
+        WindowStartupLocation="CenterScreen"
+        Icon="/Resources/Icons/guage32.ico"
+        Background="#FFFFFF">
+    <!-- 说明：提醒弹窗为运行时创建的独立窗口，主题资源解析不稳定，故使用固定中性配色（白底深灰字），
+         图标颜色在代码中从应用主题色读取，保证任何主题/资源状态下都正常显示 -->
+    <Border Margin="14" Padding="18" CornerRadius="10"
+            Background="#FFFFFF"
+            BorderBrush="#E5E5E5"
+            BorderThickness="1"
+            x:Name="RootBorder">
+        <StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <base:Icon x:Name="ReminderIcon" IconType="ReminderFill" FontSize="26"
+                           Foreground="#8080FF"
+                           VerticalAlignment="Center"/>
+                <TextBlock x:Name="TitleText" Margin="10,0,0,0"
+                           FontSize="18"
+                           FontWeight="SemiBold" VerticalAlignment="Center"
+                           Foreground="#1A1A1A"/>
+            </StackPanel>
+            <TextBlock x:Name="MessageText" Margin="0,12,0,0" TextWrapping="Wrap"
+                       FontSize="13"
+                       LineHeight="22"
+                       Foreground="#4F4F4F"/>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,18,0,0">
+                <Btn:Button x:Name="ActionButton" Content="知道了" MinWidth="96"
+                            Click="ActionButton_Click"/>
+                <Btn:Button Content="关闭" MinWidth="80" Margin="10,0,0,0"
+                            Click="CloseButton_Click"/>
+            </StackPanel>
+        </StackPanel>
+    </Border>
+</Window>

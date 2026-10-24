@@ -1,0 +1,41 @@
+{
+    "manifest_version": 3,
+    "name": "guage Sentry",
+    "description": "更矩 网页浏览数据统计扩展，支持 Chrome / Edge。仅与本机 更矩 客户端通信。",
+    "version": "1.0.0",
+    "minimum_chrome_version": "116",
+    "icons": {
+        "16": "icons/icon16.png",
+        "32": "icons/icon32.png",
+        "48": "icons/icon48.png",
+        "128": "icons/icon128.png"
+    },
+    "action": {
+        "default_title": "guage Sentry",
+        "default_icon": {
+            "16": "icons/icon16.png",
+            "32": "icons/icon32.png",
+            "48": "icons/icon48.png",
+            "128": "icons/icon128.png"
+        }
+    },
+    "background": {
+        "service_worker": "service-worker.js",
+        "type": "module"
+    },
+    "permissions": [
+        "tabs",
+        "windows",
+        "storage"
+    ],
+    "host_permissions": [
+        "http://127.0.0.1:8909/*",
+        "http://127.0.0.1:8911/*",
+        "http://127.0.0.1:8913/*"
+    ],
+    "browser_specific_settings": {
+        "edge": {
+            "browser_action_next_to_addressbar": true
+        }
+    }
+}

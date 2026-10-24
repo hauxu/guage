@@ -1,0 +1,432 @@
+﻿<Window x:Class="UI.Controls.Window.RingTossWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:base="clr-namespace:UI.Controls.Base"
+        xmlns:btn="clr-namespace:UI.Controls.Button"
+        Title="套圈水机" Width="628" Height="764"
+        WindowStyle="None" AllowsTransparency="True" Background="Transparent"
+        ResizeMode="NoResize" ShowInTaskbar="False" Focusable="True"
+        WindowStartupLocation="CenterOwner" Topmost="False">
+    <Window.Resources>
+        <!-- 机械按压泵钮：凹座 + 镀铬环 + 高光圆顶 -->
+        <Style x:Key="JetButton" TargetType="Button">
+            <Setter Property="Width" Value="72"/>
+            <Setter Property="Height" Value="72"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Focusable" Value="False"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Grid x:Name="BtnGrid" RenderTransformOrigin="0.5,0.5" Margin="3">
+                            <Ellipse Fill="#052338" Opacity="0.6" Margin="-2,3,-2,-4"/>
+                            <Ellipse Fill="#0B3A58"/>
+                            <Ellipse Fill="#0E4467" Margin="1.5"/>
+                            <Ellipse StrokeThickness="3">
+                                <Ellipse.Stroke>
+                                    <LinearGradientBrush StartPoint="0,0" EndPoint="0.2,1">
+                                        <GradientStop Color="#F4FAFE" Offset="0"/>
+                                        <GradientStop Color="#9FB4C6" Offset="0.5"/>
+                                        <GradientStop Color="#E2EDF5" Offset="0.8"/>
+                                        <GradientStop Color="#7C93A8" Offset="1"/>
+                                    </LinearGradientBrush>
+                                </Ellipse.Stroke>
+                                <Ellipse.Fill>
+                                    <LinearGradientBrush StartPoint="0,0" EndPoint="0.2,1">
+                                        <GradientStop Color="#D7E6F0" Offset="0"/>
+                                        <GradientStop Color="#8FA9BC" Offset="1"/>
+                                    </LinearGradientBrush>
+                                </Ellipse.Fill>
+                            </Ellipse>
+                            <Ellipse Margin="4.5" Fill="{TemplateBinding Background}">
+                                <Ellipse.Effect>
+                                    <DropShadowEffect BlurRadius="5" ShadowDepth="2.5" Direction="270" Opacity="0.4" Color="#06202F"/>
+                                </Ellipse.Effect>
+                            </Ellipse>
+                            <Ellipse Margin="4.5">
+                                <Ellipse.Fill>
+                                    <LinearGradientBrush StartPoint="0,0" EndPoint="0.25,1">
+                                        <GradientStop Color="#66FFFFFF" Offset="0"/>
+                                        <GradientStop Color="#00FFFFFF" Offset="0.45"/>
+                                        <GradientStop Color="#26FFFFFF" Offset="1"/>
+                                    </LinearGradientBrush>
+                                </Ellipse.Fill>
+                            </Ellipse>
+                            <Ellipse Margin="9,7,9,0" Height="20" VerticalAlignment="Top">
+                                <Ellipse.Fill>
+                                    <RadialGradientBrush Center="0.5,0.4" GradientOrigin="0.5,0.3" RadiusX="0.7" RadiusY="0.9">
+                                        <GradientStop Color="#AAFFFFFF" Offset="0"/>
+                                        <GradientStop Color="#22FFFFFF" Offset="0.6"/>
+                                        <GradientStop Color="#00FFFFFF" Offset="1"/>
+                                    </RadialGradientBrush>
+                                </Ellipse.Fill>
+                            </Ellipse>
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,2,0,0"/>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="BtnGrid" Property="RenderTransform">
+                                    <Setter.Value>
+                                        <TranslateTransform X="0" Y="2.5"/>
+                                    </Setter.Value>
+                                </Setter>
+                                <Setter TargetName="BtnGrid" Property="Opacity" Value="0.85"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- 模式切换小钮 -->
+        <Style x:Key="ModeToggle" TargetType="Button">
+            <Setter Property="Height" Value="21"/>
+            <Setter Property="MinWidth" Value="56"/>
+            <Setter Property="Focusable" Value="False"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Foreground" Value="#9FC7E6"/>
+            <Setter Property="FontSize" Value="10.5"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="ModeBg" CornerRadius="3" Background="{TemplateBinding Background}"
+                                BorderThickness="1" BorderBrush="#3F7FB4">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" Margin="8,0"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="ModeBg" Property="BorderBrush" Value="#8FD2F2"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
+    <!-- 长六边形立体屏样式：全屏环流（左钮顺时针 / 右钮逆时针，反向叠加抵消） -->
+    <Grid x:Name="ShellRoot">
+        <!-- 立体厚度：最深层（下沉的本体侧壁） -->
+        <Path Data="M72,0 L532,0 Q570,0 592,20 Q604,32 604,62 L604,678 Q604,708 592,720 Q570,740 532,740 L72,740 Q34,740 12,720 Q0,708 0,678 L0,62 Q0,32 12,20 Z"
+              Fill="#04202F" Opacity="0.9" IsHitTestVisible="False"
+              RenderTransformOrigin="0.5,0.5">
+            <Path.CacheMode><BitmapCache/></Path.CacheMode>
+            <Path.RenderTransform>
+                <TranslateTransform X="9" Y="13"/>
+            </Path.RenderTransform>
+        </Path>
+        <!-- 立体厚度：中间调层 -->
+        <Path Data="M72,0 L532,0 Q570,0 592,20 Q604,32 604,62 L604,678 Q604,708 592,720 Q570,740 532,740 L72,740 Q34,740 12,720 Q0,708 0,678 L0,62 Q0,32 12,20 Z"
+              Fill="#0A3A5C" Opacity="0.85" IsHitTestVisible="False"
+              RenderTransformOrigin="0.5,0.5">
+            <Path.CacheMode><BitmapCache/></Path.CacheMode>
+            <Path.RenderTransform>
+                <TranslateTransform X="5" Y="7"/>
+            </Path.RenderTransform>
+        </Path>
+
+        <!-- 正面（注塑渐变 + 顶部受光） -->
+        <Path Data="M72,0 L532,0 Q570,0 592,20 Q604,32 604,62 L604,678 Q604,708 592,720 Q570,740 532,740 L72,740 Q34,740 12,720 Q0,708 0,678 L0,62 Q0,32 12,20 Z"
+              StrokeThickness="2" IsHitTestVisible="False">
+            <Path.CacheMode><BitmapCache/></Path.CacheMode>
+            <Path.Stroke>
+                <LinearGradientBrush StartPoint="0,0" EndPoint="0.4,1">
+                    <GradientStop Color="#C8EBFB" Offset="0"/>
+                    <GradientStop Color="#3E7CA8" Offset="0.5"/>
+                    <GradientStop Color="#0C3E66" Offset="1"/>
+                </LinearGradientBrush>
+            </Path.Stroke>
+            <Path.Fill>
+                <LinearGradientBrush StartPoint="0,0" EndPoint="0.2,1">
+                    <GradientStop Color="#54C2ED" Offset="0"/>
+                    <GradientStop Color="#2B93CE" Offset="0.4"/>
+                    <GradientStop Color="#1A6BA6" Offset="0.75"/>
+                    <GradientStop Color="#0E4E80" Offset="1"/>
+                </LinearGradientBrush>
+            </Path.Fill>
+        </Path>
+        <!-- 顶部高光带（塑料斜面受光） -->
+        <Path Data="M72,0 L532,0 Q570,0 592,20 Q604,32 604,62 L604,678 Q604,708 592,720 Q570,740 532,740 L72,740 Q34,740 12,720 Q0,708 0,678 L0,62 Q0,32 12,20 Z" IsHitTestVisible="False">
+            <Path.CacheMode><BitmapCache/></Path.CacheMode>
+            <Path.Fill>
+                <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                    <GradientStop Color="#55FFFFFF" Offset="0"/>
+                    <GradientStop Color="#12FFFFFF" Offset="0.08"/>
+                    <GradientStop Color="#00FFFFFF" Offset="0.25"/>
+                </LinearGradientBrush>
+            </Path.Fill>
+        </Path>
+        <!-- 内斜切倒角（正面四周向内一圈深色收边） -->
+        <Path Data="M65,4 L539,4 L599,64 L599,676 L539,736 L65,736 L5,676 L5,64 Z"
+              Stroke="#0B3557" StrokeThickness="2.5" Opacity="0.55" IsHitTestVisible="False">
+            <Path.CacheMode><BitmapCache/></Path.CacheMode>
+        </Path>
+        <!-- 内斜切内侧亮线（倒角受光棱） -->
+        <Path Data="M67,6 L537,6 L597,66 L597,674 L537,734 L67,734 L7,674 L7,66 Z"
+              Stroke="#9FDFF7" StrokeThickness="1" Opacity="0.35" IsHitTestVisible="False">
+            <Path.CacheMode><BitmapCache/></Path.CacheMode>
+        </Path>
+
+        <Grid Margin="64,50,64,58">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <!-- 顶部：贴纸（微倾斜的童年贴纸）+ 关闭钮 -->
+            <Grid Grid.Row="0" Margin="0,0,0,10">
+                <Border Width="150" Height="26" CornerRadius="4" HorizontalAlignment="Center"
+                        Background="#F7ECC8" BorderBrush="#C9A85C" BorderThickness="1.5"
+                        RenderTransformOrigin="0.5,0.5">
+                    <Border.RenderTransform>
+                        <RotateTransform Angle="-2.5"/>
+                    </Border.RenderTransform>
+                    <Border.Effect>
+                        <DropShadowEffect BlurRadius="3" ShadowDepth="1.5" Direction="270" Opacity="0.35" Color="#08304E"/>
+                    </Border.Effect>
+                    <Border>
+                        <Border.Background>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                <GradientStop Color="#44FFFFFF" Offset="0"/>
+                                <GradientStop Color="#00FFFFFF" Offset="0.5"/>
+                            </LinearGradientBrush>
+                        </Border.Background>
+                        <TextBlock Text="套 圈 水 机" FontSize="13.5" FontWeight="Bold" Foreground="#17588A"
+                                   HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                </Border>
+
+                <Button x:Name="CloseButton" Width="30" Height="30" HorizontalAlignment="Right"
+                        VerticalAlignment="Center" Margin="0,0,14,0" Cursor="Hand" Focusable="False"
+                        Click="CloseButton_Click">
+                    <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                            <Grid x:Name="CloseGrid" RenderTransformOrigin="0.5,0.5">
+                                <Grid.RenderTransform>
+                                    <ScaleTransform ScaleX="1" ScaleY="1"/>
+                                </Grid.RenderTransform>
+                                <Ellipse Fill="#06283F" Opacity="0.55" Margin="1,2.5,1,-1"/>
+                                <Ellipse StrokeThickness="2">
+                                    <Ellipse.Stroke>
+                                        <LinearGradientBrush StartPoint="0,0" EndPoint="0.2,1">
+                                            <GradientStop Color="#EAF4FA" Offset="0"/>
+                                            <GradientStop Color="#8CA3B5" Offset="1"/>
+                                        </LinearGradientBrush>
+                                    </Ellipse.Stroke>
+                                    <Ellipse.Fill>
+                                        <LinearGradientBrush StartPoint="0,0" EndPoint="0.25,1">
+                                            <GradientStop Color="#C24534" Offset="0"/>
+                                            <GradientStop Color="#8E2415" Offset="0.6"/>
+                                            <GradientStop Color="#5E1409" Offset="1"/>
+                                        </LinearGradientBrush>
+                                    </Ellipse.Fill>
+                                </Ellipse>
+                                <Ellipse Margin="0,2,0,0" Height="9" VerticalAlignment="Top">
+                                    <Ellipse.Fill>
+                                        <RadialGradientBrush Center="0.5,0.4" RadiusX="0.75" RadiusY="1">
+                                            <GradientStop Color="#8CFFFFFF" Offset="0"/>
+                                            <GradientStop Color="#00FFFFFF" Offset="1"/>
+                                        </RadialGradientBrush>
+                                    </Ellipse.Fill>
+                                </Ellipse>
+                                <TextBlock Text="✕" FontSize="12" FontWeight="Bold" Foreground="#FFEDE6"
+                                           HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,1,0,0"/>
+                            </Grid>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="CloseGrid" Property="Effect">
+                                        <Setter.Value>
+                                            <DropShadowEffect BlurRadius="8" ShadowDepth="0" Opacity="0.7" Color="#FF8A6E"/>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Trigger>
+                                <Trigger Property="IsPressed" Value="True">
+                                    <Setter TargetName="CloseGrid" Property="RenderTransform">
+                                        <Setter.Value>
+                                            <ScaleTransform ScaleX="0.88" ScaleY="0.88"/>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Button.Template>
+                </Button>
+            </Grid>
+
+            <!-- 分屏水箱：外凸镀铬 bezel → 内凹屏。
+                 静态投影用独立兄弟边框（不用 DropShadowEffect：Effect 作用于子树，
+                 会迫使整个逐帧动画 Canvas 每帧重算位图模糊，是最大性能杀手） -->
+            <Border Grid.Row="1" CornerRadius="18" Margin="0,2.5,0,-2" BorderThickness="0"
+                    Background="#260A3C61" IsHitTestVisible="False">
+                <Border.CacheMode><BitmapCache/></Border.CacheMode>
+            </Border>
+            <Border Grid.Row="1" CornerRadius="18" BorderThickness="4" BorderBrush="#CFE1EC"
+                    Background="#EFF8FE" Padding="5">
+                <Border BorderThickness="1.5" CornerRadius="14">
+                    <Border.BorderBrush>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="0.2,1">
+                            <GradientStop Color="#F0F8FC" Offset="0"/>
+                            <GradientStop Color="#7E97A9" Offset="0.5"/>
+                            <GradientStop Color="#D5E5EF" Offset="1"/>
+                        </LinearGradientBrush>
+                    </Border.BorderBrush>
+                    <Grid>
+                        <Border CornerRadius="12" ClipToBounds="True">
+                            <Border.Background>
+                                <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                    <GradientStop Color="#6BCDF2" Offset="0"/>
+                                    <GradientStop Color="#3899D6" Offset="0.4"/>
+                                    <GradientStop Color="#1B6CA9" Offset="0.75"/>
+                                    <GradientStop Color="#0D4A83" Offset="1"/>
+                                </LinearGradientBrush>
+                            </Border.Background>
+                            <Grid>
+                                <!--顶部空气层：水未注满，水面波浪线（静态，童年水机的真实水位）-->
+                                <Path Stretch="None" Fill="#4CDFF3FD" Stroke="#66FFFFFF" StrokeThickness="1.5"
+                                      Data="M0,0 H472 V40 Q444,52 416,40 T360,40 T304,40 T248,40 T192,40 T136,40 T80,40 T24,40 L0,46 Z"
+                                      IsHitTestVisible="False">
+                                    <Path.CacheMode><BitmapCache/></Path.CacheMode>
+                                </Path>
+                                <!--箱底沙地 + 鹅卵石（童年水机地台）-->
+                                <Path Stretch="None" Fill="#8A6B4226"
+                                      Data="M0,368 Q60,360 118,368 T236,368 T354,368 T472,368 V400 H0 Z"
+                                      IsHitTestVisible="False">
+                                    <Path.CacheMode><BitmapCache/></Path.CacheMode>
+                                </Path>
+                                <Path Stretch="None" Fill="#5F8A5A2E" Data="M20,386 a7,5 0 1 0 14,0 a7,5 0 1 0 -14,0 M60,392 a5,4 0 1 0 10,0 a5,4 0 1 0 -10,0 M330,390 a6,4 0 1 0 12,0 a6,4 0 1 0 -12,0 M400,386 a7,5 0 1 0 14,0 a7,5 0 1 0 -14,0"
+                                      IsHitTestVisible="False">
+                                    <Path.CacheMode><BitmapCache/></Path.CacheMode>
+                                </Path>
+                                <!--水草剪影（左右各一丛，静态摆动感靠透明渐变）-->
+                                <Path Stretch="None" Fill="#3D1E7A4A" Data="M40,388 C36,362 50,350 44,326 C58,344 56,368 52,388 Z M58,388 C62,368 52,356 60,338 C66,354 64,374 66,388 Z"
+                                      IsHitTestVisible="False">
+                                    <Path.CacheMode><BitmapCache/></Path.CacheMode>
+                                </Path>
+                                <Path Stretch="None" Fill="#3D1E7A4A" Data="M436,388 C440,364 428,352 436,330 C424,348 428,370 430,388 Z M420,388 C416,372 426,362 418,346 C412,360 416,376 414,388 Z"
+                                      IsHitTestVisible="False">
+                                    <Path.CacheMode><BitmapCache/></Path.CacheMode>
+                                </Path>
+                                <Canvas x:Name="BoardCanvas" Width="472" Height="400"
+                                        HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Grid>
+                        </Border>
+                        <!-- 屏幕内凹：上暗下亮的阴影渐变 -->
+                        <Border IsHitTestVisible="False" CornerRadius="12">
+                            <Border.CacheMode><BitmapCache/></Border.CacheMode>
+                            <Border.Background>
+                                <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                    <GradientStop Color="#3C0A2E4E" Offset="0"/>
+                                    <GradientStop Color="#120A2E4E" Offset="0.18"/>
+                                    <GradientStop Color="#00000000" Offset="0.4"/>
+                                    <GradientStop Color="#1439FFFF" Offset="0.92"/>
+                                    <GradientStop Color="#2E5DFFFF" Offset="1"/>
+                                </LinearGradientBrush>
+                            </Border.Background>
+                        </Border>
+                        <!-- 水体暗角（静态层） -->
+                        <Border IsHitTestVisible="False" CornerRadius="12">
+                            <Border.CacheMode><BitmapCache/></Border.CacheMode>
+                            <Border.Background>
+                                <RadialGradientBrush Center="0.5,0.42" GradientOrigin="0.5,0.42" RadiusX="0.75" RadiusY="0.68">
+                                    <GradientStop Color="#00000000" Offset="0.45"/>
+                                    <GradientStop Color="#0A04102A" Offset="0.8"/>
+                                    <GradientStop Color="#28062038" Offset="1"/>
+                                </RadialGradientBrush>
+                            </Border.Background>
+                        </Border>
+                        <!-- 玻璃反光（静态层） -->
+                        <Border IsHitTestVisible="False" CornerRadius="12">
+                            <Border.CacheMode><BitmapCache/></Border.CacheMode>
+                            <Border.Background>
+                                <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                    <GradientStop Color="#2EFFFFFF" Offset="0"/>
+                                    <GradientStop Color="#00FFFFFF" Offset="0.14"/>
+                                </LinearGradientBrush>
+                            </Border.Background>
+                        </Border>
+                    </Grid>
+                </Border>
+            </Border>
+
+            <!-- 底座：下沉凹槽面板（泵钮与控件嵌在凹槽里） -->
+            <Grid Grid.Row="2" Margin="8,14,8,0">
+                <Border CornerRadius="14" BorderThickness="2">
+                    <Border.BorderBrush>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                            <GradientStop Color="#0B3557" Offset="0"/>
+                            <GradientStop Color="#4E9CC6" Offset="1"/>
+                        </LinearGradientBrush>
+                    </Border.BorderBrush>
+                    <Border.Background>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                            <GradientStop Color="#0C3E63" Offset="0"/>
+                            <GradientStop Color="#155183" Offset="0.5"/>
+                            <GradientStop Color="#1B649C" Offset="1"/>
+                        </LinearGradientBrush>
+                    </Border.Background>
+                </Border>
+                <Border CornerRadius="12" Margin="2" IsHitTestVisible="False">
+                    <Border.Background>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                            <GradientStop Color="#26061026" Offset="0"/>
+                            <GradientStop Color="#00000000" Offset="0.3"/>
+                        </LinearGradientBrush>
+                    </Border.Background>
+                </Border>
+
+                <Grid Margin="6,8,6,8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Button x:Name="LeftJetButton" Grid.Column="0" Style="{StaticResource JetButton}"
+                            Background="#C23A28" Click="LeftJetButton_Click"/>
+
+                <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="10,0">
+                    <Border Height="34" CornerRadius="8" BorderThickness="1.5" Width="158"
+                            BorderBrush="#3F7FB4" HorizontalAlignment="Center">
+                        <Border.Background>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                <GradientStop Color="#04121F" Offset="0"/>
+                                <GradientStop Color="#0A2A44" Offset="1"/>
+                            </LinearGradientBrush>
+                        </Border.Background>
+                        <Grid>
+                            <TextBlock x:Name="TotalText" Text="00:00" FontFamily="Consolas"
+                                       FontSize="20" FontWeight="Bold" Foreground="#8CF7DE"
+                                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            <Rectangle Height="10" RadiusX="4" RadiusY="4" Margin="10,2,10,0"
+                                       VerticalAlignment="Top" Fill="#22FFFFFF" IsHitTestVisible="False"/>
+                        </Grid>
+                    </Border>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,5,0,3">
+                        <Button x:Name="RandomModeButton" Style="{StaticResource ModeToggle}"
+                                Content="随机模式" Background="#0E3355" Foreground="#9FC7E6"
+                                Click="RandomModeButton_Click" ToolTip="圈随左右涡流任意飘飞，主打趣味"/>
+                        <Button x:Name="FixedModeButton" Style="{StaticResource ModeToggle}"
+                                Content="固定模式" Margin="4,0,0,0" Background="#2FA3D8"
+                                Foreground="#FFFFFF" Click="FixedModeButton_Click"
+                                ToolTip="每泵一次必有一圈套上对应柱，主打快速设定"/>
+                    </StackPanel>
+                    <TextBlock x:Name="UnitText" FontSize="{DynamicResource AppFontSizeCaption}"
+                               Foreground="#D8EDF9" HorizontalAlignment="Center" Margin="2,3,2,6"
+                               TextWrapping="Wrap" MaxWidth="180" TextAlignment="Center"/>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                        <btn:Button Content="重置" Height="28" MinWidth="70" Background="#E9DFC0"
+                                    Foreground="#0A3C61" Click="ResetButton_Click"
+                                    FontSize="{DynamicResource AppFontSizeCaption}"/>
+                        <btn:Button Content="确认" Height="28" MinWidth="70" Margin="8,0,0,0"
+                                    Background="#1F7AC2" Foreground="White" Click="ConfirmButton_Click"
+                                    FontSize="{DynamicResource AppFontSizeCaption}"/>
+                    </StackPanel>
+                </StackPanel>
+
+                <Button x:Name="RightJetButton" Grid.Column="2" Style="{StaticResource JetButton}"
+                        Background="#D97E2F" Click="RightJetButton_Click"/>
+                </Grid>
+            </Grid>
+        </Grid>
+    </Grid>
+</Window>

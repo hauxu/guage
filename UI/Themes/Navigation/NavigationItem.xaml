@@ -1,0 +1,214 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:local="clr-namespace:UI.Controls.Navigation"
+                    xmlns:base="clr-namespace:UI.Controls.Base"
+                    xmlns:anim="clr-namespace:UI.Base.Animation">
+
+    <Style TargetType="{x:Type local:NavigationItem}">
+        <Setter Property="SnapsToDevicePixels" Value="true" />
+        <Setter Property="Width" Value="64"/>
+        <Setter Property="Height" Value="68"/>
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type local:NavigationItem}">
+                    <Grid x:Name="Root" Background="Transparent" RenderTransformOrigin="0.5,0.5">
+                        <Grid.RenderTransform>
+                            <ScaleTransform ScaleX="1" ScaleY="1"/>
+                        </Grid.RenderTransform>
+
+                        <!--悬停底色与选中底色分成两层，各自用不透明度过渡，
+                            避免像此前那样两套动画争抢同一个 Background 笔刷-->
+                        <Border x:Name="HoverBg" CornerRadius="10" Opacity="0"
+                                Background="{DynamicResource HoverBackgroundBrush}"/>
+                        <Border x:Name="SelectedBg" CornerRadius="10" Opacity="0"
+                                Background="{DynamicResource NavSelectedBrush}"/>
+
+                        <Grid x:Name="Content" Margin="5">
+                            <!--图标宿主承载位移与缩放，两个图标共用同一变换-->
+                            <Grid x:Name="IconHost" VerticalAlignment="Center" RenderTransformOrigin="0.5,0.5">
+                                <Grid.RenderTransform>
+                                    <TransformGroup>
+                                        <ScaleTransform ScaleX="1" ScaleY="1"/>
+                                        <TranslateTransform X="0" Y="-5"/>
+                                    </TransformGroup>
+                                </Grid.RenderTransform>
+                                <!--未选中的描边图标-->
+                                <base:Icon x:Name="Icon" IconType="{TemplateBinding Icon}" FontSize="17"
+                                           Foreground="{DynamicResource NavUnselectedTextBrush}"/>
+                                <!--选中的填充图标，与上一层交叉淡入淡出-->
+                                <base:Icon x:Name="IconSelected" FontSize="17" Opacity="0"
+                                           IconType="{Binding RelativeSource={RelativeSource AncestorType={x:Type local:NavigationItem}}, Path=SelectedIcon}"
+                                           Foreground="{DynamicResource ThemeBrush}"/>
+                            </Grid>
+
+                            <!--加粗用于在通透背景上提升辨识度-->
+                            <TextBlock x:Name="Title" RenderOptions.EdgeMode="Aliased" Text="{TemplateBinding Title}"
+                                       VerticalAlignment="Bottom" HorizontalAlignment="Center"
+                                       FontSize="{TemplateBinding TitleFontSize}"
+                                       FontWeight="SemiBold"
+                                       TextAlignment="Center" TextWrapping="Wrap" MaxWidth="58"
+                                       Foreground="{DynamicResource NavUnselectedTextBrush}" Margin="0,4,0,0"/>
+                        </Grid>
+
+                        <VisualStateManager.VisualStateGroups>
+                            <VisualStateGroup x:Name="CommonStates">
+                                <VisualState x:Name="Normal">
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="HoverBg" Storyboard.TargetProperty="Opacity"
+                                                         To="0" Duration="0:0:0.28">
+                                            <DoubleAnimation.EasingFunction>
+                                                <CubicEase EasingMode="EaseOut"/>
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                        <DoubleAnimation Storyboard.TargetName="Root" Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)"
+                                                         To="1" Duration="0:0:0.45">
+                                            <DoubleAnimation.EasingFunction>
+                                                <anim:SpringEase Bounce="0.35" EasingMode="EaseOut"/>
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                        <DoubleAnimation Storyboard.TargetName="Root" Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)"
+                                                         To="1" Duration="0:0:0.45">
+                                            <DoubleAnimation.EasingFunction>
+                                                <anim:SpringEase Bounce="0.35" EasingMode="EaseOut"/>
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                    </Storyboard>
+                                </VisualState>
+
+                                <VisualState x:Name="MouseOver">
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="HoverBg" Storyboard.TargetProperty="Opacity"
+                                                         To="1" Duration="0:0:0.18">
+                                            <DoubleAnimation.EasingFunction>
+                                                <CubicEase EasingMode="EaseOut"/>
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                        <DoubleAnimation Storyboard.TargetName="Root" Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)"
+                                                         To="1" Duration="0:0:0.45">
+                                            <DoubleAnimation.EasingFunction>
+                                                <anim:SpringEase Bounce="0.35" EasingMode="EaseOut"/>
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                        <DoubleAnimation Storyboard.TargetName="Root" Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)"
+                                                         To="1" Duration="0:0:0.45">
+                                            <DoubleAnimation.EasingFunction>
+                                                <anim:SpringEase Bounce="0.35" EasingMode="EaseOut"/>
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                    </Storyboard>
+                                </VisualState>
+
+                                <!--按下时快速收缩，松开由上面两个状态用弹簧弹回-->
+                                <VisualState x:Name="Pressed">
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="HoverBg" Storyboard.TargetProperty="Opacity"
+                                                         To="1" Duration="0:0:0.08"/>
+                                        <DoubleAnimation Storyboard.TargetName="Root" Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)"
+                                                         To="0.92" Duration="0:0:0.1">
+                                            <DoubleAnimation.EasingFunction>
+                                                <CubicEase EasingMode="EaseOut"/>
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                        <DoubleAnimation Storyboard.TargetName="Root" Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)"
+                                                         To="0.92" Duration="0:0:0.1">
+                                            <DoubleAnimation.EasingFunction>
+                                                <CubicEase EasingMode="EaseOut"/>
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                    </Storyboard>
+                                </VisualState>
+                            </VisualStateGroup>
+                        </VisualStateManager.VisualStateGroups>
+                    </Grid>
+
+                    <ControlTemplate.Triggers>
+                        <!--无标题的条目作为分隔项-->
+                        <Trigger Property="Title" Value="{x:Null}">
+                            <Setter Property="Height" Value="15"/>
+                            <Setter Property="Visibility" TargetName="Content" Value="Collapsed"/>
+                        </Trigger>
+
+                        <Trigger Property="IsSelected" Value="True">
+                            <Trigger.EnterActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="SelectedBg" Storyboard.TargetProperty="Opacity"
+                                                         To="1" Duration="0:0:0.28">
+                                            <DoubleAnimation.EasingFunction>
+                                                <CubicEase EasingMode="EaseOut"/>
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                        <DoubleAnimation Storyboard.TargetName="Icon" Storyboard.TargetProperty="Opacity"
+                                                         To="0" Duration="0:0:0.18"/>
+                                        <DoubleAnimation Storyboard.TargetName="IconSelected" Storyboard.TargetProperty="Opacity"
+                                                         To="1" Duration="0:0:0.26"/>
+                                        <DoubleAnimation Storyboard.TargetName="Title" Storyboard.TargetProperty="Opacity"
+                                                         To="0" Duration="0:0:0.16"/>
+                                        <!--标题让位后图标下移居中，并轻微放大以强调选中-->
+                                        <DoubleAnimation Storyboard.TargetName="IconHost" Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[1].(TranslateTransform.Y)"
+                                                         To="0" Duration="0:0:0.45">
+                                            <DoubleAnimation.EasingFunction>
+                                                <anim:SpringEase Bounce="0.3" EasingMode="EaseOut"/>
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                        <DoubleAnimation Storyboard.TargetName="IconHost" Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleX)"
+                                                         To="1.1" Duration="0:0:0.45">
+                                            <DoubleAnimation.EasingFunction>
+                                                <anim:SpringEase Bounce="0.3" EasingMode="EaseOut"/>
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                        <DoubleAnimation Storyboard.TargetName="IconHost" Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleY)"
+                                                         To="1.1" Duration="0:0:0.45">
+                                            <DoubleAnimation.EasingFunction>
+                                                <anim:SpringEase Bounce="0.3" EasingMode="EaseOut"/>
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.EnterActions>
+
+                            <Trigger.ExitActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="SelectedBg" Storyboard.TargetProperty="Opacity"
+                                                         To="0" Duration="0:0:0.22">
+                                            <DoubleAnimation.EasingFunction>
+                                                <CubicEase EasingMode="EaseOut"/>
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                        <DoubleAnimation Storyboard.TargetName="Icon" Storyboard.TargetProperty="Opacity"
+                                                         To="1" Duration="0:0:0.26"/>
+                                        <DoubleAnimation Storyboard.TargetName="IconSelected" Storyboard.TargetProperty="Opacity"
+                                                         To="0" Duration="0:0:0.18"/>
+                                        <DoubleAnimation Storyboard.TargetName="Title" Storyboard.TargetProperty="Opacity"
+                                                         To="1" Duration="0:0:0.26"/>
+                                        <DoubleAnimation Storyboard.TargetName="IconHost" Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[1].(TranslateTransform.Y)"
+                                                         To="-5" Duration="0:0:0.4">
+                                            <DoubleAnimation.EasingFunction>
+                                                <anim:SpringEase Bounce="0.2" EasingMode="EaseOut"/>
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                        <DoubleAnimation Storyboard.TargetName="IconHost" Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleX)"
+                                                         To="1" Duration="0:0:0.4">
+                                            <DoubleAnimation.EasingFunction>
+                                                <anim:SpringEase Bounce="0.2" EasingMode="EaseOut"/>
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                        <DoubleAnimation Storyboard.TargetName="IconHost" Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleY)"
+                                                         To="1" Duration="0:0:0.4">
+                                            <DoubleAnimation.EasingFunction>
+                                                <anim:SpringEase Bounce="0.2" EasingMode="EaseOut"/>
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.ExitActions>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+</ResourceDictionary>

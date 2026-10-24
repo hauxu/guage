@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>休息提醒 · 谷歌表盘风格时长选择器 · 交付说明</title>
+<style>
+  :root { color-scheme: light; }
+  body { font-family: "Segoe UI", "Microsoft YaHei", sans-serif; margin: 0; background: #f4f5f7; color: #202124; line-height: 1.65; }
+  .wrap { max-width: 960px; margin: 0 auto; padding: 32px 20px 64px; }
+  h1 { font-size: 26px; margin: 0 0 6px; }
+  h2 { font-size: 19px; margin: 36px 0 12px; border-left: 4px solid #8080FF; padding-left: 10px; }
+  .sub { color: #5f6368; font-size: 14px; }
+  .tag { display: inline-block; background: #eef0ff; color: #5a5ae6; border-radius: 12px; padding: 2px 12px; font-size: 12px; margin: 4px 6px 0 0; }
+  .card { background: #fff; border-radius: 14px; padding: 20px 22px; margin: 14px 0; box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+  .metrics { display: flex; gap: 14px; flex-wrap: wrap; margin: 14px 0; }
+  .metric { flex: 1; min-width: 160px; background: #fff; border-radius: 14px; padding: 16px 18px; box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+  .metric .num { font-size: 26px; font-weight: 600; color: #4a4ae2; }
+  .metric .lbl { font-size: 13px; color: #5f6368; margin-top: 4px; }
+  table { border-collapse: collapse; width: 100%; margin: 12px 0; font-size: 14px; }
+  th, td { border: 1px solid #e4e6ea; padding: 8px 12px; text-align: left; vertical-align: top; }
+  th { background: #f8f9fc; font-weight: 600; }
+  .ok { color: #188038; font-weight: 600; }
+  .warn { color: #b06000; font-weight: 600; }
+  .imgrow { display: flex; gap: 14px; flex-wrap: wrap; margin: 12px 0; }
+  .imgrow figure { flex: 1; min-width: 280px; margin: 0; }
+  .imgrow img { width: 100%; border-radius: 10px; border: 1px solid #e4e6ea; }
+  .imgrow figcaption { font-size: 12px; color: #5f6368; text-align: center; margin-top: 6px; }
+  code { background: #f1f3f4; border-radius: 5px; padding: 1px 6px; font-size: 13px; }
+  ul { margin: 8px 0 8px 20px; }
+  li { margin: 4px 0; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>休息提醒 · 时长选择表盘改造</h1>
+  <div class="sub">谷歌表盘风格（Material Time Picker · 分钟模式）· 交付时间 2026-08-13 · Debug / Release 均已构建</div>
+  <div>
+    <span class="tag">表盘重绘</span><span class="tag">丝滑动画</span><span class="tag">反馈充分</span><span class="tag">值传递闭环</span>
+  </div>
+
+  <div class="card">
+    <h2 style="margin-top:0">改造内容</h2>
+    <p>将「休息提醒」页面中<b>工作时长 / 休息时长</b>两个时长选择表盘重写为谷歌 Material 表盘风格（参考用户提供的 Android 时间选择器截图）：</p>
+    <ul>
+      <li><b>盘面</b>：浅色/深色主题自适应的圆形盘面（跟随 SettingPanelBgBrush 亮度），细圆边框；</li>
+      <li><b>刻度</b>：60 个分钟刻度，每 5 分钟一个加长主刻度（共 12 个）；</li>
+      <li><b>数字标注</b>：外圈 12 个标注数字 00 / 05 / 10 … 55，颜色按盘面亮度自动派生（深盘浅字、浅盘深字），任何主题下清晰可见；</li>
+      <li><b>指针</b>：主题色细线从圆心指向选中分钟 + 圆心圆点 + 末端圆点（与参考图一致）；</li>
+      <li><b>选中态</b>：指针指向的 5 分钟倍率数字被主题色实心圆包裹（白色文字）；</li>
+      <li><b>动画</b>：指针沿最短路径平滑旋转（跨 0 点反向绕行），Decelerate 缓动、420ms、16ms 步进（60fps 渲染管线）；值变化时选中圆播放 1→1.18→1 脉冲反馈动画；</li>
+      <li><b>降级</b>：系统减动效（ReduceMotion）时全部动画降级为静态直跳；控件卸载自动停止动画计时器；</li>
+      <li><b>交互</b>：点击 / 拖拽表盘按角度实时选值（中心 18% 半径内忽略防误触），值域钳制 0-59；</li>
+      <li><b>业务衔接</b>：Value 双向绑定、0-59 分钟值域、小时步进器与总时长显示全部保留，底层计时/提醒逻辑未动。</li>
+    </ul>
+    <div class="metrics">
+      <div class="metric"><div class="num">60</div><div class="lbl">分钟刻度（每 5 分钟主刻度）</div></div>
+      <div class="metric"><div class="num">12</div><div class="lbl">标注数字 00/05/10…55</div></div>
+      <div class="metric"><div class="num">420ms</div><div class="lbl">指针旋转动画时长（Decelerate 缓动）</div></div>
+      <div class="metric"><div class="num">16ms</div><div class="lbl">动画步进（≈60fps）</div></div>
+    </div>
+    <div class="imgrow">
+      <figure><img src="assets/fix-evidence/dial-material-v1.png" alt="表盘改造后"><figcaption>改造后：Material 表盘（盘面/刻度/数字标注/指针/选中圆）</figcaption></figure>
+      <figure><img src="assets/fix-evidence/dial-material-numbers.png" alt="数字标注细节"><figcaption>数字标注细节：00/05/10…55 全部清晰可见</figcaption></figure>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2 style="margin-top:0">验证结果</h2>
+    <table>
+      <tr><th>验证项</th><th>结果</th></tr>
+      <tr><td>表盘视觉（盘面/刻度/指针/圆点/选中圆）</td><td class="ok">通过——图像模型逐像素确认：Material 风格、正圆无变形、指针+圆心点+末端点齐全</td></tr>
+      <tr><td>数字标注可见性</td><td class="ok">通过——00/05/10…55 全部渲染清晰（按盘面亮度派生对比色）</td></tr>
+      <tr><td>点击选值</td><td class="ok">通过——点击表盘后指针从正上（0）移动到目标角度（实测 270°→330°）</td></tr>
+      <tr><td>值传递 + 持久化</td><td class="ok">通过——点击表盘后配置 WorkMinutes 从 15 变为 18（AppConfig.json 实时落盘）</td></tr>
+      <tr><td>退出重进状态保持</td><td class="ok">通过——重启应用后指针从 0 恢复到右侧 ≈18°（与配置 18 一致，±2 分钟测量精度）</td></tr>
+      <tr><td>构建</td><td class="ok">通过——Debug / Release 均编译通过（12:06）</td></tr>
+      <tr><td>减动效降级 / 卸载清理</td><td class="ok">代码层面——ReduceMotion 直跳、Unloaded 停止动画计时器</td></tr>
+      <tr><td>异常处理</td><td class="ok">代码层面——值域钳制 0-59、中心区域防误触、动画计时器生命周期管理</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2 style="margin-top:0">改动文件</h2>
+    <table>
+      <tr><th>文件</th><th>改动</th></tr>
+      <tr><td><code>UI\Controls\BreakReminderDial.cs</code></td><td>全量重写：Material 表盘绘制（盘面/刻度/数字/指针/选中圆）、点击拖拽选值、DispatcherTimer 驱动的指针动画、脉冲反馈动画、减动效降级、Unloaded 停表</td></tr>
+      <tr><td>其他文件</td><td>无改动——XAML 布局、VM 绑定、计时/提醒逻辑均保持不变（<code>Value="{Binding DialWorkValue, Mode=TwoWay}"</code> 等既有绑定直接兼容）</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2 style="margin-top:0">验收自测清单（请真机/本机逐项确认）</h2>
+    <ul>
+      <li><b>视觉比对</b>：进入休息提醒页，与参考截图逐项比对盘面布局、刻度分布、指针样式、配色与阴影（亮/暗主题各看一遍）；</li>
+      <li><b>动画流畅度</b>：快速连续点击/拖拽表盘，观察指针旋转与选中圆脉冲是否丝滑无跳变（可录屏检查 60fps）；</li>
+      <li><b>滑动选值</b>：按住表盘拖动到任意角度，数值实时更新，松手即停（值域 0-59）；</li>
+      <li><b>跨零点</b>：从 55 拖到 5，指针应走最短路径（反向绕行）而非长路；</li>
+      <li><b>值传递</b>：选择时长后观察下方总时长文字同步更新；点「开始计时」验证计时按所选时长运行；</li>
+      <li><b>状态保持</b>：设置时长后退出页面/重启应用，重新进入表盘指针应恢复上次选择；</li>
+      <li><b>禁用态</b>：取消勾选「工作时长/休息时长」复选框，表盘应变灰且不可操作；</li>
+      <li><b>回归</b>：完整走通 选择时长 → 确认 → 开始计时 → 提醒触发 → 休息轮转，确认无功能回归；</li>
+      <li><b>快速连点</b>：连续快速点击表盘不同位置，不应卡死、崩溃或状态错乱。</li>
+    </ul>
+    <p class="sub">说明：本次自动化验证环境存在输入焦点/窗口状态波动，已用「强制激活 + 像素取证」闭环验证核心路径；触觉振动类反馈在 WPF 无系统 API，以视觉脉冲动画等效替代；60fps 帧率实测建议按上述清单录屏确认。</p>
+  </div>
+</div>
+</body>
+</html>

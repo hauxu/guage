@@ -1,0 +1,487 @@
+﻿<Page
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:btn="clr-namespace:UI.Controls.Button"
+      xmlns:toggle="clr-namespace:UI.Controls.Toggle"
+      xmlns:input="clr-namespace:UI.Controls.Input"
+      xmlns:select="clr-namespace:UI.Controls.Select"
+      xmlns:base="clr-namespace:UI.Controls.Base"
+      x:Class="UI.Views.TimeLimitPage"
+      mc:Ignorable="d"
+      d:DesignHeight="640" d:DesignWidth="920"
+      Title="TimeLimitPage"
+      Loaded="Page_Loaded"
+      Foreground="{DynamicResource StandardTextBrush}" Background="Transparent">
+    <Page.Resources>
+        <Style x:Key="GlassCard" TargetType="Border">
+            <Setter Property="Background" Value="{DynamicResource SettingPanelBgBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource SettingPanelBorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="10"/>
+            <Setter Property="Padding" Value="18"/>
+            <Setter Property="SnapsToDevicePixels" Value="True"/>
+        </Style>
+        <Style x:Key="RuleCardBorder" TargetType="Border">
+            <Setter Property="Background" Value="{DynamicResource SettingPanelBgBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource SettingPanelBorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="10"/>
+            <Setter Property="Padding" Value="16"/>
+            <Setter Property="Margin" Value="0,0,0,10"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="RenderTransformOrigin" Value="0.5,0.5"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsChecked}" Value="True">
+                    <Setter Property="BorderBrush" Value="{DynamicResource ThemeBrush}"/>
+                    <Setter Property="BorderThickness" Value="1.5"/>
+                </DataTrigger>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background">
+                        <Setter.Value>
+                            <SolidColorBrush Color="{DynamicResource HoverBackgroundColor}" Opacity="0.35"/>
+                        </Setter.Value>
+                    </Setter>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        <Style x:Key="PickerSectionHeader" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="{DynamicResource AppFontSizeSecondary}"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="{DynamicResource ThemeBrush}"/>
+            <Setter Property="Margin" Value="0,10,0,6"/>
+        </Style>
+        <Style x:Key="PickerIndexLetter" TargetType="Button">
+            <Setter Property="MinWidth" Value="20"/>
+            <Setter Property="MinHeight" Value="0"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Margin" Value="0"/>
+            <Setter Property="FontSize" Value="{DynamicResource AppFontSizeCaption}"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Foreground" Value="{DynamicResource SubTextBrush}"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Opacity" Value="0.4"/>
+            <Setter Property="VerticalAlignment" Value="Stretch"/>
+            <Setter Property="HorizontalAlignment" Value="Stretch"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Grid RenderTransformOrigin="0.5,0.5">
+                            <Border x:Name="LetterBg" CornerRadius="9" Background="Transparent"/>
+                            <Viewbox Stretch="Uniform" Margin="1">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Viewbox>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="LetterBg" Property="Background">
+                                    <Setter.Value>
+                                        <SolidColorBrush Color="{DynamicResource ThemeColor}" Opacity="0.14"/>
+                                    </Setter.Value>
+                                </Setter>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsAvailable}" Value="True">
+                    <Setter Property="Opacity" Value="1"/>
+                    <Setter Property="Foreground" Value="{DynamicResource StandardTextBrush}"/>
+                </DataTrigger>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Foreground" Value="{DynamicResource ThemeBrush}"/>
+                </Trigger>
+                <Trigger Property="IsPressed" Value="True">
+                    <Setter Property="RenderTransformOrigin" Value="0.5,0.5"/>
+                    <Setter Property="RenderTransform">
+                        <Setter.Value>
+                            <ScaleTransform ScaleX="0.85" ScaleY="0.85"/>
+                        </Setter.Value>
+                    </Setter>
+                </Trigger>
+                <Trigger Property="IsEnabled" Value="False">
+                    <Setter Property="Cursor" Value="Arrow"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        <Style x:Key="FloatingScrollTopButton" TargetType="Border">
+            <Setter Property="Width" Value="36"/>
+            <Setter Property="Height" Value="36"/>
+            <Setter Property="CornerRadius" Value="18"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Opacity" Value="0.55"/>
+            <Setter Property="Background">
+                <Setter.Value>
+                    <SolidColorBrush Color="{DynamicResource ThemeColor}" Opacity="0.12"/>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="BorderBrush">
+                <Setter.Value>
+                    <SolidColorBrush Color="{DynamicResource ThemeColor}" Opacity="0.22"/>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="ToolTip" Value="回到顶部"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Opacity" Value="0.92"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        <Style x:Key="FieldLabel" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="{DynamicResource AppFontSizeSecondary}"/>
+            <Setter Property="Foreground" Value="{DynamicResource SubTextBrush}"/>
+            <Setter Property="Margin" Value="0,0,0,6"/>
+        </Style>
+        <Style x:Key="AppPickerRow" TargetType="Border">
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Padding" Value="12,10"/>
+            <Setter Property="Margin" Value="0,0,0,8"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="SnapsToDevicePixels" Value="True"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background">
+                        <Setter.Value>
+                            <SolidColorBrush Color="{DynamicResource HoverBackgroundColor}" Opacity="0.45"/>
+                        </Setter.Value>
+                    </Setter>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </Page.Resources>
+
+    <Grid Margin="20,16,20,32">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- 页头 -->
+        <Grid x:Name="HeaderPanel" Grid.Row="0" Margin="0,4,0,20">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <StackPanel>
+                <TextBlock Text="时长限制" FontSize="{DynamicResource AppFontSizeTitle}" FontWeight="SemiBold"/>
+                <TextBlock Margin="0,6,0,0" Foreground="{DynamicResource SubTextBrush}" TextWrapping="Wrap"
+                           Text="追踪前台使用时长，到达每日上限后自动提醒或执行限制操作。"/>
+            </StackPanel>
+            <Border Grid.Column="1" Width="52" Height="52" CornerRadius="12" VerticalAlignment="Top" Opacity="0.9">
+                <Border.Background>
+                    <SolidColorBrush Color="{DynamicResource ThemeColor}" Opacity="0.14"/>
+                </Border.Background>
+                <base:Icon IconType="ScreenTime" FontSize="24" Foreground="{DynamicResource ThemeBrush}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            </Border>
+        </Grid>
+
+        <!-- 总开关 -->
+        <Border x:Name="ToggleCard" Grid.Row="1" Style="{StaticResource GlassCard}" Margin="0,0,0,16">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel VerticalAlignment="Center">
+                    <Border HorizontalAlignment="Left" Padding="10,4" CornerRadius="6" Margin="0,0,0,8">
+                        <Border.Background>
+                            <SolidColorBrush Color="{DynamicResource ThemeColor}" Opacity="0.16"/>
+                        </Border.Background>
+                        <StackPanel Orientation="Horizontal" TextElement.Foreground="{DynamicResource ThemeBrush}">
+                            <base:Icon IconType="QuietHours" FontSize="{DynamicResource AppFontSizeSecondary}" VerticalAlignment="Center"/>
+                            <TextBlock Text="总开关" FontSize="{DynamicResource AppFontSizeCaption}" Margin="6,0,0,0" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Border>
+                    <TextBlock Text="启用时长限制" FontSize="{DynamicResource AppFontSizeBody}" FontWeight="SemiBold"/>
+                    <TextBlock Margin="0,6,0,0" Foreground="{DynamicResource SubTextBrush}" TextWrapping="Wrap"
+                               Text="关闭后规则保留但不生效，适合临时停用。"/>
+                </StackPanel>
+                <toggle:Toggle Grid.Column="1" VerticalAlignment="Center" IsChecked="{Binding IsEnabled, Mode=TwoWay}"/>
+            </Grid>
+        </Border>
+
+        <!-- 工具栏 -->
+        <StackPanel x:Name="ToolbarPanel" Grid.Row="2" Orientation="Horizontal" Margin="0,0,0,14">
+            <btn:Button Icon="Add" Content="添加应用" Width="118" Command="{Binding AddFromTrackedAppCommand}"/>
+            <btn:Button Icon="OpenFile" Content="浏览 exe" Width="110" Margin="8,0,0,0" Command="{Binding BrowseExeCommand}"/>
+            <btn:Button Icon="Delete" Content="{Binding DeleteButtonText}" MinWidth="88" Margin="8,0,0,0"
+                        Command="{Binding RemoveRuleCommand}" IsEnabled="{Binding HasSelection}"/>
+            <btn:Button Icon="Refresh" Content="重新同步" Width="110" Margin="8,0,0,0"
+                        Command="{Binding ResyncTodayCommand}" ToolTip="自动检查新的一天，并重新同步今日应用时长"/>
+        </StackPanel>
+
+        <!-- 规则列表 -->
+        <Grid x:Name="RulesPanel" Grid.Row="3">
+            <StackPanel Visibility="{Binding EmptyVisibility}" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="0,40,0,0">
+                <Border Width="72" Height="72" CornerRadius="18" HorizontalAlignment="Center">
+                    <Border.Background>
+                        <SolidColorBrush Color="{DynamicResource ThemeColor}" Opacity="0.1"/>
+                    </Border.Background>
+                    <base:Icon IconType="MobQuietHours" FontSize="32" Foreground="{DynamicResource ThemeBrush}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                </Border>
+                <TextBlock Text="还没有限制规则" FontSize="{DynamicResource AppFontSizeBody}" FontWeight="SemiBold" HorizontalAlignment="Center" Margin="0,16,0,0"/>
+                <TextBlock Foreground="{DynamicResource SubTextBrush}" HorizontalAlignment="Center" Margin="0,8,0,0"
+                           Text="点击「添加应用」扫描本机应用并选择，或浏览本地 exe 文件。"/>
+            </StackPanel>
+
+            <Grid x:Name="RulesScrollHost" Visibility="{Binding RulesVisibility}">
+                <ItemsControl ItemsSource="{Binding RuleItems}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border Style="{StaticResource RuleCardBorder}"
+                                    MouseLeftButtonUp="RuleCard_MouseLeftButtonUp">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+                                    <Grid Grid.Row="0">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <CheckBox Grid.Column="0" VerticalAlignment="Center" Margin="0,0,12,0"
+                                                  IsChecked="{Binding IsChecked, Mode=TwoWay}"
+                                                  Click="RuleCheckBox_Click"/>
+                                        <Border Grid.Column="1" Width="40" Height="40" CornerRadius="10" Margin="0,0,12,0">
+                                            <Border.Background>
+                                                <SolidColorBrush Color="{DynamicResource ThemeColor}" Opacity="0.18"/>
+                                            </Border.Background>
+                                            <TextBlock Text="{Binding IconLetter}" FontWeight="SemiBold" FontSize="16"
+                                                       Foreground="{DynamicResource ThemeBrush}"
+                                                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+                                        <StackPanel Grid.Column="2" VerticalAlignment="Center">
+                                            <base:MarqueeTextBlock HorizontalAlignment="Stretch" Text="{Binding Name}" TextFontSize="{DynamicResource AppFontSizeBody}" TextFontWeight="SemiBold"
+                                                                   TextForeground="{DynamicResource StandardTextBrush}"/>
+                                            <TextBlock Margin="0,3,0,0" Foreground="{DynamicResource SubTextBrush}" FontSize="{DynamicResource AppFontSizeSecondary}"
+                                                       Text="{Binding ProcessName}" TextTrimming="CharacterEllipsis"/>
+                                        </StackPanel>
+                                        <StackPanel Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Center">
+                                            <Border Padding="8,3" CornerRadius="6" Margin="0,0,10,0">
+                                                <Border.Background>
+                                                    <SolidColorBrush Color="{DynamicResource ThemeColor}" Opacity="0.12"/>
+                                                </Border.Background>
+                                                <TextBlock Text="{Binding ActionBadge}" FontSize="{DynamicResource AppFontSizeCaption}" Foreground="{DynamicResource ThemeBrush}"/>
+                                            </Border>
+                                            <toggle:Toggle IsChecked="{Binding Enabled, Mode=TwoWay}" ToolTip="启用此规则"/>
+                                        </StackPanel>
+                                    </Grid>
+
+                                    <Grid Grid.Row="1" Margin="64,14,0,0">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="120"/>
+                                            <ColumnDefinition Width="16"/>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="16"/>
+                                            <ColumnDefinition Width="120"/>
+                                        </Grid.ColumnDefinitions>
+                                        <StackPanel Grid.Column="0">
+                                            <TextBlock Text="每日上限 (分钟)" Style="{StaticResource FieldLabel}"/>
+                                            <input:InputBox Text="{Binding LimitMinutesText, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                                                            MinHeight="34" CornerRadius="8" HorizontalAlignment="Stretch"/>
+                                        </StackPanel>
+                                        <StackPanel Grid.Column="2">
+                                            <TextBlock Text="达到上限后" Style="{StaticResource FieldLabel}"/>
+                                            <select:Select Options="{Binding ActionOptions}"
+                                                           SelectedItem="{Binding SelectedAction, Mode=TwoWay}"
+                                                           IsShowIcon="False" Padding="10,6"/>
+                                        </StackPanel>
+                                        <base:View Grid.Column="4" Value="{Binding ShowCountdownField}">
+                                            <StackPanel>
+                                                <TextBlock Text="倒计时 (秒)" Style="{StaticResource FieldLabel}"/>
+                                                <input:InputBox Text="{Binding CountdownSecondsText, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                                                                MinHeight="34" CornerRadius="8" HorizontalAlignment="Stretch"/>
+                                            </StackPanel>
+                                        </base:View>
+                                    </Grid>
+
+                                    <!-- 高级选项：按动作类型显示 -->
+                                    <Grid Grid.Row="2" Margin="64,16,0,0">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="190"/>
+                                            <ColumnDefinition Width="16"/>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="16"/>
+                                            <ColumnDefinition Width="190"/>
+                                        </Grid.ColumnDefinitions>
+
+                                        <base:View Grid.Column="0" Value="{Binding ShowWarnOptions}">
+                                            <StackPanel>
+                                                <CheckBox Content="使用 Windows 消息弹窗" IsChecked="{Binding UseNativeMessageBox, Mode=TwoWay}"/>
+                                            </StackPanel>
+                                        </base:View>
+
+                                        <base:View Grid.Column="2" Value="{Binding ShowCountdownOptions}">
+                                            <StackPanel>
+                                                <CheckBox Content="右上角置顶悬浮倒计时" IsChecked="{Binding ShowFloatingCountdown, Mode=TwoWay}"/>
+                                                <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
+                                                    <TextBlock Text="透明度" Style="{StaticResource FieldLabel}" VerticalAlignment="Center"/>
+                                                    <input:InputBox Width="56" Height="30" CornerRadius="8" Margin="8,0,0,0"
+                                                                 Text="{Binding CountdownOpacityText, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
+                                                </StackPanel>
+                                                <CheckBox Content="连击 3 次隐藏倒计时" IsChecked="{Binding HideByTripleClick, Mode=TwoWay}" Margin="0,6,0,0"/>
+                                                <CheckBox Content="结束后禁止再次启动" IsChecked="{Binding BanRestart, Mode=TwoWay}" Margin="0,6,0,0"/>
+                                            </StackPanel>
+                                        </base:View>
+
+                                        <base:View Grid.Column="4" Value="{Binding ShowLockOptions}">
+                                            <StackPanel>
+                                                <TextBlock Text="密码方式" Style="{StaticResource FieldLabel}"/>
+                                                <select:Select Options="{Binding PasswordModeOptions}"
+                                                               SelectedItem="{Binding SelectedPasswordMode, Mode=TwoWay}"
+                                                               IsShowIcon="False" Padding="10,6"/>
+                                                <input:InputBox Text="{Binding CustomPasswordText, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                                                                MinHeight="32" CornerRadius="8" Margin="0,6,0,0" Placeholder="自定义密码(留空则随机)"/>
+                                                <TextBlock Text="解锁后再次锁定(分钟,0=不锁)" Style="{StaticResource FieldLabel}" Margin="0,10,0,0"/>
+                                                <input:InputBox Text="{Binding RelockMinutesText, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                                                                MinHeight="32" CornerRadius="8"/>
+                                                <CheckBox Content="锁定期间退出重开立即锁定" IsChecked="{Binding RelockAfterExit, Mode=TwoWay}" Margin="0,8,0,0"/>
+                                            </StackPanel>
+                                        </base:View>
+                                    </Grid>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </Grid>
+
+        </Grid>
+
+        <Popup x:Name="PickerPopup" AllowsTransparency="True" StaysOpen="True" PopupAnimation="None"
+               Opened="PickerPopup_Opened">
+            <Grid x:Name="PickerOverlay">
+                <Border x:Name="PickerPanel" MaxWidth="560" MaxHeight="580" VerticalAlignment="Center" HorizontalAlignment="Center"
+                        Background="{DynamicResource StandardBackgroundBrush2}" CornerRadius="12"
+                        BorderBrush="{DynamicResource WindowContentBorder}" BorderThickness="1" Padding="22"
+                        Opacity="0" IsHitTestVisible="False">
+                    <Border.Effect>
+                        <DropShadowEffect BlurRadius="28" ShadowDepth="0" Direction="0" Opacity="0.18" Color="{DynamicResource ThemeColor}"/>
+                    </Border.Effect>
+                    <Grid x:Name="PickerRoot" DataContext="{Binding DataContext, RelativeSource={RelativeSource AncestorType=Page}}">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <Grid>
+                        <TextBlock Text="选择应用" FontSize="{DynamicResource AppFontSizeTitle}" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                        <btn:IconButton Icon="ChromeClose" HorizontalAlignment="Right" FontSize="{DynamicResource AppFontSizeSecondary}" Foreground="{DynamicResource SubTextBrush}"
+                                        Command="{Binding ClosePickerCommand}"/>
+                    </Grid>
+                    <input:InputBox Grid.Row="1" Margin="0,16,0,0" Placeholder="搜索应用名称或路径..." Icon="Search" MinHeight="38"
+                                    Text="{Binding SearchKeyword, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                    <Grid Grid.Row="2" Margin="0,14,0,0" MinHeight="300">
+                        <Border Visibility="{Binding PickerLoadingVisibility}"
+                                VerticalAlignment="Center" HorizontalAlignment="Center"
+                                Padding="24,32" MinWidth="280">
+                            <StackPanel HorizontalAlignment="Center">
+                                <TextBlock Text="正在扫描本机应用" FontSize="{DynamicResource AppFontSizeBody}" FontWeight="SemiBold"
+                                           Foreground="{DynamicResource StandardTextBrush}"
+                                           HorizontalAlignment="Center"/>
+                                <TextBlock Margin="0,10,0,0" FontSize="{DynamicResource AppFontSizeSecondary}" TextAlignment="Center"
+                                           Foreground="{DynamicResource SubTextBrush}" TextWrapping="Wrap"
+                                           MaxWidth="320"
+                                           Text="正在读取开始菜单与已安装程序列表，请稍候..."/>
+                            </StackPanel>
+                        </Border>
+                        <Grid Visibility="{Binding PickerListVisibility}" VerticalAlignment="Stretch">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <ScrollViewer x:Name="PickerListScrollViewer"
+                                          VerticalScrollBarVisibility="Auto"
+                                          CanContentScroll="False" PanningMode="VerticalOnly">
+                                <ItemsControl x:Name="PickerItemsControl" ItemsSource="{Binding FilteredPickerItems}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <StackPanel>
+                                                <TextBlock Style="{StaticResource PickerSectionHeader}"
+                                                           Text="{Binding SectionLetter}"
+                                                           Visibility="{Binding SectionVisibility}"/>
+                                                <Border Style="{StaticResource AppPickerRow}"
+                                                        Visibility="{Binding AppVisibility}"
+                                                        MouseLeftButtonUp="AppRow_MouseLeftButtonUp">
+                                                    <Grid>
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="Auto"/>
+                                                            <ColumnDefinition Width="*"/>
+                                                        </Grid.ColumnDefinitions>
+                                                        <Border Width="40" Height="40" CornerRadius="10" Margin="0,0,14,0"
+                                                                SnapsToDevicePixels="True" UseLayoutRounding="True">
+                                                            <base:Img URL="{Binding App.IconFile}" Width="40" Height="40" Radius="10"/>
+                                                        </Border>
+                                                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                                            <base:MarqueeTextBlock HorizontalAlignment="Stretch" Text="{Binding App.Description}" TextFontSize="{DynamicResource AppFontSizeBody}" TextFontWeight="SemiBold"
+                                                                                   TextForeground="{DynamicResource StandardTextBrush}"/>
+                                                            <base:MarqueeTextBlock HorizontalAlignment="Stretch" Text="{Binding App.Name}" TextFontSize="{DynamicResource AppFontSizeSecondary}"
+                                                                                   TextForeground="{DynamicResource SubTextBrush}" Margin="0,4,0,0"/>
+                                                        </StackPanel>
+                                                    </Grid>
+                                                </Border>
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </ScrollViewer>
+                            <Border Grid.Column="1" Margin="8,0,0,0" Padding="4,0,0,0" MinWidth="24"
+                                    VerticalAlignment="Stretch"
+                                    BorderBrush="{DynamicResource SettingPanelBorderBrush}" BorderThickness="1,0,0,0">
+                                <ItemsControl ItemsSource="{Binding PickerLetters}" VerticalAlignment="Stretch">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <UniformGrid Rows="27" Columns="1"/>
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Button Style="{StaticResource PickerIndexLetter}"
+                                                    Content="{Binding Letter}"
+                                                    Command="{Binding DataContext.JumpToLetterCommand, ElementName=PickerRoot}"
+                                                    CommandParameter="{Binding Letter}"
+                                                    IsEnabled="{Binding IsAvailable}"/>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </Border>
+                        </Grid>
+                    </Grid>
+                    <Grid Grid.Row="3" Margin="0,14,0,0" Visibility="{Binding PickerFooterVisibility}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" VerticalAlignment="Center" FontSize="{DynamicResource AppFontSizeSecondary}"
+                                   Foreground="{DynamicResource SubTextBrush}"
+                                   Text="{Binding PickerHintText}" TextWrapping="Wrap" Margin="0,0,12,0"/>
+                        <btn:Button Grid.Column="1" Icon="OpenFile" Content="浏览 exe" Width="108"
+                                    Command="{Binding PickerBrowseExeCommand}"/>
+                    </Grid>
+                    </Grid>
+                </Border>
+            </Grid>
+        </Popup>
+
+        <Border x:Name="ScrollTopFloat" Style="{StaticResource FloatingScrollTopButton}"
+                Grid.RowSpan="4" Visibility="Collapsed" Panel.ZIndex="30"
+                HorizontalAlignment="Left" VerticalAlignment="Top" Margin="4,4,0,0"
+                MouseLeftButtonUp="ScrollTopFloat_MouseLeftButtonUp">
+            <base:Icon IconType="ChevronUp" FontSize="16" Foreground="{DynamicResource ThemeBrush}"
+                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
+        </Border>
+    </Grid>
+</Page>
