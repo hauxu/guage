@@ -24,6 +24,7 @@ namespace Guage.Tests
             UpdatePackageVerifierTests.RunAll();
             UpdateSignatureVerifierTests.RunAll();
             BreakReminderTests.RunAll();
+            AppConfigTests.RunAll();
 
             Console.WriteLine();
             Console.WriteLine($"===== 汇总：通过 {_passed}，失败 {_failed} =====");

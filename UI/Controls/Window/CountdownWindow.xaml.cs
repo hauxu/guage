@@ -16,8 +16,6 @@ namespace UI.Controls.Window
     {
         private readonly DispatcherTimer _timer;
         private int _remainingSeconds;
-        private int _clickCount;
-        private DateTime _lastClickTime = DateTime.MinValue;
         private readonly bool _hideByTripleClick;
         private readonly bool _floatingTop;
 
@@ -128,7 +126,16 @@ namespace UI.Controls.Window
 
         private void RootBorder_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-            // 双击：进入拖动模式（可把倒计时拖动到任意位置/屏幕）
+            // 三击隐藏：必须先于双击判定，否则双击（拖动）分支会在第 2 次点击就 return，
+            // 三击永远数不满。隐藏只是把倒计时窗收起来：计时继续、规则保持锁定，
+            // 到时照常结束进程（隐藏不是绕过限制）
+            if (_hideByTripleClick && e.ClickCount >= 3)
+            {
+                Hide();
+                return;
+            }
+
+            // 双击：进入拖动模式（可把倒计时拖动到任意位置/屏幕）；双击不隐藏窗口
             if (e.ClickCount == 2)
             {
                 try
@@ -139,27 +146,6 @@ namespace UI.Controls.Window
                 {
                     // 拖动被系统取消时忽略
                 }
-                return;
-            }
-
-            if (!_hideByTripleClick)
-            {
-                return;
-            }
-
-            var now = DateTime.Now;
-            if ((now - _lastClickTime).TotalMilliseconds > 1500)
-            {
-                _clickCount = 0;
-            }
-            _lastClickTime = now;
-            _clickCount++;
-
-            if (_clickCount >= 3)
-            {
-                _clickCount = 0;
-                // 连击 3 次：关闭倒计时窗口（计时继续，到时照常结束进程）
-                Hide();
             }
         }
 

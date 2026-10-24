@@ -331,7 +331,8 @@
                                                     <input:InputBox Width="56" Height="30" CornerRadius="8" Margin="8,0,0,0"
                                                                  Text="{Binding CountdownOpacityText, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
                                                 </StackPanel>
-                                                <CheckBox Content="连击 3 次隐藏倒计时" IsChecked="{Binding HideByTripleClick, Mode=TwoWay}" Margin="0,6,0,0"/>
+                                                <CheckBox Content="三击隐藏倒计时窗" IsChecked="{Binding HideByTripleClick, Mode=TwoWay}" Margin="0,6,0,0"
+                                                          ToolTip="仅作用于倒计时窗；锁定遮罩不提供隐藏入口（安全优先）"/>
                                                 <CheckBox Content="结束后禁止再次启动" IsChecked="{Binding BanRestart, Mode=TwoWay}" Margin="0,6,0,0"/>
                                             </StackPanel>
                                         </base:View>

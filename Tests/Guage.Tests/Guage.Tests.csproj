@@ -74,6 +74,8 @@
     <Compile Include="UpdatePackageVerifierTests.cs" />
     <Compile Include="UpdateSignatureVerifierTests.cs" />
     <Compile Include="BreakReminderTests.cs" />
+    <Compile Include="AppConfigTests.cs" />
+    <Compile Include="TempStorageScope.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Core\Core.csproj">

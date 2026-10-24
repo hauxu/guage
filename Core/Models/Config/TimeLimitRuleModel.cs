@@ -50,7 +50,8 @@ namespace Core.Models.Config
         public double CountdownOpacity { get; set; } = 0.5;
 
         /// <summary>
-        /// 悬浮倒计时：连击 3 次隐藏
+        /// 悬浮倒计时：三击隐藏倒计时窗
+        /// （仅作用于倒计时窗；锁定遮罩不提供隐藏入口，安全优先）
         /// </summary>
         public bool HideByTripleClick { get; set; } = true;
 

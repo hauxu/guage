@@ -495,6 +495,7 @@ namespace Core.Servicers.Instances
                         rule.ExecutablePath,
                         rule.ShowFloatingCountdown,
                         rule.CountdownOpacity,
+                        //  作用域：仅倒计时窗可三击隐藏；锁定遮罩（LockOverlay）不提供隐藏入口，安全优先
                         rule.HideByTripleClick);
                     if (countdownResult == TimeLimitDialogResult.Kill)
                     {
