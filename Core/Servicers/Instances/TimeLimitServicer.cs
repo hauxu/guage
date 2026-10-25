@@ -128,6 +128,10 @@ namespace Core.Servicers.Instances
                 }
 
                 _triggeredToday.Remove(ruleKey);
+                //  延长必须先解除锁定态：否则下一个 tick 又命中 _lockedRules 重新弹窗，
+                //  延长的这几分钟当场作废，用户按了等于没按
+                _lockedRules.Remove(ruleKey);
+                _reArmedToday.Remove(ruleKey);
                 _banRestartSet.Remove(processName);
                 int usage = GetUsageSeconds(ruleKey);
                 _todayUsageSeconds[ruleKey] = Math.Max(0, usage - Math.Max(1, minutes) * 60);
@@ -389,12 +393,20 @@ namespace Core.Servicers.Instances
         /// </summary>
         private void EnforceBanRestart()
         {
-            if (_banRestartSet.Count == 0)
+            //  写入点都在 _syncRoot 内，这里也要在锁内做快照再遍历；否则并发修改抛出的异常
+            //  会被外层 catch 吞掉，"禁止重启"偶发失效且日志里一个字都没有
+            List<KeyValuePair<string, string>> bannedSnapshot;
+            lock (_syncRoot)
             {
-                return;
+                if (_banRestartSet.Count == 0)
+                {
+                    return;
+                }
+
+                bannedSnapshot = _banRestartSet.ToList();
             }
 
-            foreach (var banned in _banRestartSet.ToList())
+            foreach (var banned in bannedSnapshot)
             {
                 try
                 {

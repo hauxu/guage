@@ -181,6 +181,22 @@ namespace Core.Servicers.Instances
 
         private void HandleLoadFail(string err, string configText)
         {
+            //  覆盖之前先把损坏的配置留一份：配置解析失败会让用户一次性丢掉全部设置
+            //  （时长限制规则、休息提醒、忽略列表、存储位置），没有副本就再也找不回来
+            try
+            {
+                if (!string.IsNullOrEmpty(fileName) && File.Exists(fileName))
+                {
+                    string backupPath = fileName + ".corrupt-" + DateTime.Now.ToString("yyyyMMddHHmmss");
+                    File.Copy(fileName, backupPath, true);
+                    Logger.Error("配置文件已损坏，原件备份到：" + backupPath);
+                }
+            }
+            catch (Exception backupEx)
+            {
+                Logger.Error("备份损坏配置失败：" + backupEx.Message);
+            }
+
             //  创建基础配置
             CreateDefaultConfig();
 

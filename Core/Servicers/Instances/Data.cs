@@ -260,6 +260,11 @@ namespace Core.Servicers.Instances
                     && m.DataTime.Year == month.Year
                     && m.DataTime.Month == month.Month));
 
+                //  按月清空后必须重算该应用的累计时长。只删日志不动 TotalTime，
+                //  "累计总时长"就会永远大于图表与导出的合计（ClearRange 已是这么做的）
+                db.Database.ExecuteSqlCommand(
+                    "update AppModels set TotalTime=(select coalesce(sum(Time),0) from DailyLogModels where DailyLogModels.AppModelID=AppModels.ID) where ID=" + appID);
+
                 db.SaveChanges();
             });
         }
@@ -321,7 +326,7 @@ namespace Core.Servicers.Instances
                 for (int i = 0; i < 24; i++)
                 {
                     string hours = i < 10 ? "0" + i : i.ToString();
-                    var time = date.ToString($"yyyy-MM-dd {hours}:00:00");
+                    var time = date.ToString($"yyyy-MM-dd {hours}:00:00", CultureInfo.InvariantCulture);
                     foreach (var category in categorys)
                     {
                         var log = data.Where(m => m.CategoryID == category.CategoryID && m.Time.ToString("yyyy-MM-dd HH:00:00", CultureInfo.InvariantCulture) == time).FirstOrDefault();
@@ -470,7 +475,7 @@ namespace Core.Servicers.Instances
                 for (int i = 0; i < 24; i++)
                 {
                     string hours = i < 10 ? "0" + i : i.ToString();
-                    var time = date.ToString($"yyyy-MM-dd {hours}:00:00");
+                    var time = date.ToString($"yyyy-MM-dd {hours}:00:00", CultureInfo.InvariantCulture);
 
                     var log = data.Where(m => m.Time.ToString("yyyy-MM-dd HH:00:00", CultureInfo.InvariantCulture) == time).FirstOrDefault();
 

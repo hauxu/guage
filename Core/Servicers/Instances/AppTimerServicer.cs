@@ -133,7 +133,18 @@ namespace Core.Servicers.Instances
             // time-delta accumulation: missed/duplicated ticks no longer lose/gain time
             if (_startTime != DateTime.MinValue)
             {
-                _appDuration = (int)Math.Floor((DateTime.Now - _startTime).TotalSeconds);
+                //  用墙钟差算时长，但要挡住两种系统时间异常：前跳会把几秒记成上万秒，
+                //  回拨会得到负值并让这段时间一秒都不记
+                double delta = (DateTime.Now - _startTime).TotalSeconds;
+                if (delta < 0)
+                {
+                    _startTime = DateTime.Now;
+                    _appDuration = 0;
+                }
+                else
+                {
+                    _appDuration = (int)Math.Min(86400, Math.Floor(delta));
+                }
             }
         }
 
@@ -205,7 +216,8 @@ namespace Core.Servicers.Instances
             StopTimer();
             if (_startTime != DateTime.MinValue)
             {
-                _appDuration = (int)Math.Floor((_endTime - _startTime).TotalSeconds);
+                double flushDelta = (_endTime - _startTime).TotalSeconds;
+                _appDuration = flushDelta <= 0 ? 0 : (int)Math.Min(86400, Math.Floor(flushDelta));
             }
 
             var info = GetAppDuration();

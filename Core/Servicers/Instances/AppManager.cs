@@ -66,12 +66,13 @@ namespace Core.Servicers.Instances
         public static extern bool GetGUIThreadInfo(uint idThread, ref GUITHREADINFO lpgui);
         #endregion
 
-        private Dictionary<string, AppInfo> _apps;
+        //  钩子回调(UI 线程)与 1 秒轮询(线程池)会同时访问，必须是并发字典
+        private System.Collections.Concurrent.ConcurrentDictionary<string, AppInfo> _apps;
         private int _outTime = 5000;
         //private string _windowsVersionName;
         public AppManager()
         {
-            _apps = new Dictionary<string, AppInfo>();
+            _apps = new System.Collections.Concurrent.ConcurrentDictionary<string, AppInfo>();
             //_windowsVersionName = SystemCommon.GetWindowsVersionName();
         }
 
@@ -93,9 +94,9 @@ namespace Core.Servicers.Instances
                 {
                     return AppInfo.Empty;
                 }
-                else if (_apps.ContainsKey(processName))
+                else if (_apps.TryGetValue(processName, out AppInfo cachedApp))
                 {
-                    return _apps[processName];
+                    return cachedApp;
                 }
                 else if (processName == "ApplicationFrameHost")
                 {
@@ -140,9 +141,9 @@ namespace Core.Servicers.Instances
 
                 appType = IsSystemComponent(processName, hwnd_) ? AppType.SystemComponent : AppType.Win32;
                 app = new AppInfo(hwnd_, processId, processName, description, executablePath, appType);
-                if (processName != "explorer" && !_apps.ContainsKey(processName))
+                if (processName != "explorer")
                 {
-                    _apps.Add(processName, app);
+                    _apps.TryAdd(processName, app);
                 }
                 return app;
             }

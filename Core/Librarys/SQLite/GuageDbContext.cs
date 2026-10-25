@@ -60,7 +60,12 @@ namespace Core.Librarys.SQLite
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
             var model = modelBuilder.Build(Database.Connection);
-            new SQLiteBuilder(model).SelfCheck();
+            if (!new SQLiteBuilder(model).SelfCheck())
+            {
+                //  迁移失败不能继续跑：表结构不完整的库会让之后每条查询静默失败，
+                //  抛出去交给 Main 的恢复流程用 data.handle.backup 重建
+                throw new InvalidOperationException("数据库结构迁移失败");
+            }
         }
 
         public void SelfCheck()
