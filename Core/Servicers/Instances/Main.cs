@@ -361,7 +361,8 @@ namespace Core.Servicers.Instances
         /// <param name="file"></param>
         private bool IsCheckApp(string processName, string description, string file)
         {
-            if (string.IsNullOrEmpty(file) || string.IsNullOrEmpty(processName) || DefaultIgnoreProcess.Contains(processName) || IgnoreProcessCacheList.Contains(processName))
+            //  file 为空不代表应用不可统计：提权进程读不到路径，但进程名仍然可信
+            if (string.IsNullOrEmpty(processName) || DefaultIgnoreProcess.Contains(processName) || IgnoreProcessCacheList.Contains(processName))
             {
                 return false;
             }

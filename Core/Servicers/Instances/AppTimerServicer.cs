@@ -197,7 +197,9 @@ namespace Core.Servicers.Instances
         /// <returns>需要统计时返回 true </returns>
         private bool IsStatistical(AppInfo app_)
         {
-            return !string.IsNullOrEmpty(app_.Process) && app_.Type != AppType.SystemComponent && !string.IsNullOrEmpty(app_.ExecutablePath);
+            //  不再要求可执行路径非空：提权进程（以及某些已退出进程）读不到路径，
+            //  但进程名一样有效。要求路径非空会让整类应用完全没有记录
+            return !string.IsNullOrEmpty(app_.Process) && app_.Type != AppType.SystemComponent;
         }
 
         public AppDurationUpdatedEventArgs GetAppDuration()

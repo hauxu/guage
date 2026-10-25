@@ -168,9 +168,20 @@ namespace Core.Servicers.Instances
             }
         }
 
+        private const int PROCESS_QUERY_LIMITED_INFORMATION = 0x1000;
+
         private string GetAppExecutablePath(int processId_)
         {
-            IntPtr processHandle = OpenProcess(0x001F0FFF, false, processId_);
+            //  PROCESS_ALL_ACCESS 对提权进程必然被拒（非提权调用者拿不到），
+            //  结果就是"以管理员身份运行的程序"整类读不到路径、进而整类不被统计。
+            //  QueryFullProcessImageName 只需要 QUERY_LIMITED_INFORMATION，
+            //  老系统上退回 QUERY_INFORMATION
+            IntPtr processHandle = OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, false, processId_);
+            if (processHandle == IntPtr.Zero)
+            {
+                processHandle = OpenProcess(PROCESS_QUERY_INFORMATION, false, processId_);
+            }
+
             if (processHandle == IntPtr.Zero)
             {
                 return string.Empty;
@@ -180,7 +191,11 @@ namespace Core.Servicers.Instances
             {
                 int MaxPathLength = 4096;
                 var buffer = new StringBuilder(MaxPathLength);
-                QueryFullProcessImageName(processHandle, 0, buffer, ref MaxPathLength);
+                if (!QueryFullProcessImageName(processHandle, 0, buffer, ref MaxPathLength))
+                {
+                    return string.Empty;
+                }
+
                 return buffer.ToString();
             }
             finally
