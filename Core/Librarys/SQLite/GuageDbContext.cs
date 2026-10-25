@@ -12,6 +12,8 @@ using System.Threading.Tasks;
 
 namespace Core.Librarys.SQLite
 {
+    //  EF 要求 DbConfiguration 只能设一次（应用启动前），每次 new Context 都重设属于未定义行为
+    [DbConfigurationType(typeof(SQLiteConfiguration))]
     public class GuageDbContext : DbContext
     {
         /// <summary>
@@ -54,7 +56,7 @@ namespace Core.Librarys.SQLite
            BusyTimeout = 15000
        }, true)
         {
-            DbConfiguration.SetConfiguration(new SQLiteConfiguration());
+            //  数据库配置由类上的 [DbConfigurationType] 指定，这里不再重设
         }
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)

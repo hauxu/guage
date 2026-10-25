@@ -47,6 +47,9 @@ namespace Core.Servicers.Instances
                 if (item != null)
                 {
                     db.Categorys.Remove(item);
+                    //  分类 ID 是 INTEGER PRIMARY KEY，删除后会被新建分类复用；
+                    //  不把引用清掉，旧分类下的应用下次会静默归入新分类
+                    db.Database.ExecuteSqlCommand("update AppModels set CategoryID = 0 where CategoryID = " + category.ID);
                     db.SaveChanges();
                 }
             });

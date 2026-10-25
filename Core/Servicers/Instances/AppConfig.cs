@@ -233,7 +233,19 @@ namespace Core.Servicers.Instances
         }
 
 
+        private readonly object _saveLock = new object();
+
         public void Save()
+        {
+            //  设置页的防抖保存和 TimeLimitServicer 的 Task.Run 会在不同线程同时调进来：
+            //  不加锁时两个线程共用同一个 .tmp 文件，互相覆盖会让配置静默丢失
+            lock (_saveLock)
+            {
+                SaveCore();
+            }
+        }
+
+        private void SaveCore()
         {
             if (config == null)
             {
@@ -264,7 +276,7 @@ namespace Core.Servicers.Instances
                 }
 
                 //  原子写入：先写临时文件再替换，避免写一半崩溃损坏配置
-                string tempFile = fileName + ".tmp";
+                string tempFile = fileName + "." + Guid.NewGuid().ToString("N") + ".tmp";
                 File.WriteAllText(tempFile, JsonConvert.SerializeObject(config));
                 try
                 {

@@ -49,6 +49,14 @@ namespace Core.Servicers.Instances
             _appDuration = 0;
             _activeProcess = string.Empty;
 
+            //  每次睡眠/唤醒都会再走一遍 Init；不释放旧定时器就会在 TimerQueue 里
+            //  累积已停止但仍被引用的实例（一天睡十次就多十个）
+            if (_timer != null)
+            {
+                _timer.Elapsed -= Timer_Elapsed;
+                _timer.Dispose();
+            }
+
             _timer = new System.Timers.Timer();
             _timer.Interval = 1000;
             _timer.Elapsed += Timer_Elapsed;

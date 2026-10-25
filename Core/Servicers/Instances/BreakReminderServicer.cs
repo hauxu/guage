@@ -25,7 +25,12 @@ namespace Core.Servicers.Instances
         private readonly object _syncRoot = new object();
         private readonly System.Timers.Timer _timer;
         private readonly List<BreakReminderRecordModel> _records = new List<BreakReminderRecordModel>();
-        private readonly string _recordsPath;
+        //  存储目录可以在设置里改到别处，所以路径必须每次现算，
+        //  否则换目录后新记的台账还写进旧目录，前后分裂成两份
+        private string RecordsPath
+        {
+            get { return Path.Combine(FileHelper.GetDataDirectory(), "BreakReminderRecords.json"); }
+        }
 
         private BreakReminderPhase _currentPhase = BreakReminderPhase.Idle;
         private bool _isRunning;
@@ -92,7 +97,6 @@ namespace Core.Servicers.Instances
         public BreakReminderServicer(ISleepdiscover sleepdiscover)
         {
             _sleepdiscover = sleepdiscover;
-            _recordsPath = Path.Combine(FileHelper.GetDataDirectory(), "BreakReminderRecords.json");
             _timer = new System.Timers.Timer(1000);
             _timer.Elapsed += Timer_Elapsed;
             _timer.AutoReset = true;
@@ -404,17 +408,17 @@ namespace Core.Servicers.Instances
 
                 //  原子写入：写盘中途被杀（崩溃/断电）时不至于损坏唯一一份台账，
                 //  旧实现直写目标文件，损坏后 LoadRecords 静默清空、后续保存覆盖全丢
-                string tempPath = _recordsPath + ".tmp";
+                string tempPath = RecordsPath + ".tmp";
                 File.WriteAllText(tempPath, JsonConvert.SerializeObject(_records));
                 try
                 {
-                    if (File.Exists(_recordsPath))
+                    if (File.Exists(RecordsPath))
                     {
-                        File.Replace(tempPath, _recordsPath, null);
+                        File.Replace(tempPath, RecordsPath, null);
                     }
                     else
                     {
-                        File.Move(tempPath, _recordsPath);
+                        File.Move(tempPath, RecordsPath);
                     }
                 }
                 catch
@@ -443,9 +447,9 @@ namespace Core.Servicers.Instances
         {
             try
             {
-                if (File.Exists(_recordsPath))
+                if (File.Exists(RecordsPath))
                 {
-                    var list = JsonConvert.DeserializeObject<List<BreakReminderRecordModel>>(File.ReadAllText(_recordsPath));
+                    var list = JsonConvert.DeserializeObject<List<BreakReminderRecordModel>>(File.ReadAllText(RecordsPath));
                     if (list != null)
                     {
                         _records.Clear();

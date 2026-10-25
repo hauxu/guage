@@ -90,6 +90,13 @@ namespace Core.Servicers.Instances
             //  从数据库恢复今日已用时长与触发状态，防止重启软件重置计时绕过限制
             RestoreTodayUsage();
 
+            //  同 AppTimerServicer：睡眠/唤醒会重复 Start，先释放上一个实例
+            if (_timer != null)
+            {
+                _timer.Elapsed -= Timer_Elapsed;
+                _timer.Dispose();
+            }
+
             _timer = new Timer(1000);
             _timer.Elapsed += Timer_Elapsed;
             _timer.AutoReset = true;
