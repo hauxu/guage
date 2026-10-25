@@ -548,10 +548,7 @@ namespace UI.ViewModels
                 LoadThisWeekData(version);
                 LoadThisWeekMoreData(version);
             }
-            //else
-            //{
-            //    LoadLastWeekData();
-            //}
+
         }
 
         #region 今日数据
@@ -677,29 +674,6 @@ namespace UI.ViewModels
         }
         #endregion
 
-        #region 上周数据
-        private void LoadLastWeekData()
-        {
-            //IsLoading = true;
-            //var task = Task.Run(() =>
-            // {
-            //     var list = data.GetLastWeeklogList();
-            //     var res = MapToChartsData(list);
-            //     IsLoading = false;
-            //     return res;
-            // });
-            //WeekData = await task;
-            IsLoading = true;
-            Task.Run(() =>
-            {
-                var list = data.GetLastWeeklogList();
-                var res = MapToChartsData(list);
-                IsLoading = false;
-                WeekData = res;
-            });
-
-        }
-        #endregion
 
         #region 处理数据
         private List<ChartsDataModel> MapToChartsData(IEnumerable<Core.Models.DailyLogModel> list)

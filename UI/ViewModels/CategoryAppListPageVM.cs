@@ -270,44 +270,35 @@ namespace UI.ViewModels
 
         private void Search(string keyword)
         {
+            string lower = string.IsNullOrEmpty(keyword) ? null : keyword.ToLower();
+
             Task.Run(() =>
               {
-                  if (!string.IsNullOrEmpty(keyword))
+                  //  后台只做匹配判定：Visibility 是绑定属性，必须在 UI 线程改，
+                  //  否则 WPF 会抛跨线程异常（原来的写法就是在 Task.Run 里直接赋值的）
+                  var list = AppList.ToList();
+                  var matched = new List<bool>(list.Count);
+                  foreach (var item in list)
                   {
-                      Debug.WriteLine(keyword);
-                      keyword = keyword.ToLower();
-
-                      //var list = appList.Where(m => m.App.Description.ToLower().IndexOf(keyword) != -1 || m.App.Name.ToLower().IndexOf(keyword) != -1).ToList();
-                      var list = AppList.ToList();
-
-                      foreach (var item in list)
-                      {
-                          item.Visibility = item.App.Description != null && item.App.Description.ToLower().IndexOf(keyword) != -1 || item.App.Name != null && item.App.Name.ToLower().IndexOf(keyword) != -1 ? System.Windows.Visibility.Visible : System.Windows.Visibility.Collapsed;
-                      }
-
-                      return list;
-
+                      matched.Add(lower == null
+                          || (item.App.Description != null && item.App.Description.ToLower().IndexOf(lower) != -1)
+                          || (item.App.Name != null && item.App.Name.ToLower().IndexOf(lower) != -1));
                   }
-                  else
-                  {
-                      var list = AppList.ToList();
 
-                      foreach (var item in list)
-                      {
-                          item.Visibility = System.Windows.Visibility.Visible;
-                      }
-
-                      return list;
-
-                  }
+                  return new { List = list, Matched = matched };
               })
+              .ContinueWith(task =>
+              {
+                  var result = task.Result;
+                  for (int i = 0; i < result.List.Count; i++)
+                  {
+                      result.List[i].Visibility = result.Matched[i]
+                          ? System.Windows.Visibility.Visible
+                          : System.Windows.Visibility.Collapsed;
+                  }
 
-      .ContinueWith(task =>
-      {
-          AppList = task.Result;
-
-      }, TaskScheduler.FromCurrentSynchronizationContext());
-
+                  AppList = result.List;
+              }, TaskScheduler.FromCurrentSynchronizationContext());
         }
     }
 }
