@@ -188,9 +188,73 @@ namespace Core.Servicers.Instances
 
 
 
+        /// <summary>
+
+        /// 只接受本机回环调用：Host 必须是 127.0.0.1/localhost（挡 DNS rebinding 把外部域名
+
+        /// 解析到回环），且不能是网页发起的跨站请求（Sec-Fetch-Site / Origin 判据）。
+
+        /// 本机进程仍可伪造这些头——那是本地信任模型的边界，不属于本端点的职责。
+
+        /// </summary>
+
+        private static bool IsTrustedCaller(HttpListenerRequest request)
+
+        {
+
+            string host = request.UserHostName ?? string.Empty;
+
+            if (!(host.StartsWith("127.0.0.1", StringComparison.OrdinalIgnoreCase)
+
+                || host.StartsWith("localhost", StringComparison.OrdinalIgnoreCase)))
+
+            {
+
+                return false;
+
+            }
+
+
+
+            string fetchSite = request.Headers["Sec-Fetch-Site"];
+
+            if (!string.IsNullOrEmpty(fetchSite)
+
+                && !string.Equals(fetchSite, "none", StringComparison.OrdinalIgnoreCase)
+
+                && !string.Equals(fetchSite, "same-origin", StringComparison.OrdinalIgnoreCase))
+
+            {
+
+                return false;
+
+            }
+
+
+
+            string origin = request.Headers["Origin"];
+
+            return string.IsNullOrEmpty(origin) || WebSocketSecurity.IsExtensionOrigin(origin);
+
+        }
+
+
+
         private static void HandleRequest(HttpListenerContext context)
 
         {
+
+            if (!IsTrustedCaller(context.Request))
+
+            {
+
+                WriteText(context, 403, "Forbidden", "text/plain; charset=utf-8");
+
+                return;
+
+            }
+
+
 
             string path = context.Request.Url.AbsolutePath.TrimEnd('/').ToLowerInvariant();
 

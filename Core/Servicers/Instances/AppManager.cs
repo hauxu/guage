@@ -19,12 +19,8 @@ namespace Core.Servicers.Instances
     public class AppManager : IAppManager
     {
         #region win32api
-        [DllImport("user32.dll", CharSet = CharSet.Auto)]
-        public static extern int GetWindowThreadProcessId(IntPtr hwnd, out int ID);
         [DllImport("kernel32.dll", SetLastError = true)]
         public static extern IntPtr OpenProcess(uint dwDesiredAccess, bool bInheritHandle, int dwProcessId);
-        [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Auto)]
-        public static extern bool QueryFullProcessImageName([In] IntPtr hProcess, [In] int dwFlags, [Out] StringBuilder lpExeName, ref int lpdwSize);
         public const int PROCESS_QUERY_INFORMATION = 0x0400;
         public const int PROCESS_VM_READ = 0x0010;
 
@@ -82,7 +78,7 @@ namespace Core.Servicers.Instances
             {
                 AppInfo app;
                 var sw = Stopwatch.StartNew();
-                GetWindowThreadProcessId(hwnd_, out int processId);
+                Win32API.GetWindowThreadProcessId(hwnd_, out int processId);
                 sw = Stopwatch.StartNew();
                 string processName = GetAppProcessName(processId);
                 string executablePath = string.Empty;
@@ -191,7 +187,7 @@ namespace Core.Servicers.Instances
             {
                 int MaxPathLength = 4096;
                 var buffer = new StringBuilder(MaxPathLength);
-                if (!QueryFullProcessImageName(processHandle, 0, buffer, ref MaxPathLength))
+                if (!Win32API.QueryFullProcessImageName(processHandle, 0, buffer, ref MaxPathLength))
                 {
                     return string.Empty;
                 }
@@ -240,7 +236,7 @@ namespace Core.Servicers.Instances
                 {
                     int capacity = 2000;
                     StringBuilder sb = new StringBuilder(capacity);
-                    if (!QueryFullProcessImageName(proc, 0, sb, ref capacity) || capacity <= 0)
+                    if (!Win32API.QueryFullProcessImageName(proc, 0, sb, ref capacity) || capacity <= 0)
                     {
                         //  失败时 capacity 不会被回写、仍等于缓冲长度，按它切片会越界；
                         //  异常被上层吞掉后，真正的原因（权限不足/进程已退出）就看不见了
@@ -263,7 +259,7 @@ namespace Core.Servicers.Instances
             WINDOWINFO info = (WINDOWINFO)Marshal.PtrToStructure(lParam_, typeof(WINDOWINFO));
 
             int pID;
-            GetWindowThreadProcessId(hWnd_, out pID);
+            Win32API.GetWindowThreadProcessId(hWnd_, out pID);
 
             if (pID != info.ownerpid) info.childpid = (uint)pID;
 
@@ -300,7 +296,7 @@ namespace Core.Servicers.Instances
         {
             var current = getThreadWindowHandle(0);
             int processId = 0;
-            GetWindowThreadProcessId(current, out processId);
+            Win32API.GetWindowThreadProcessId(current, out processId);
             return processId;
         }
         #endregion

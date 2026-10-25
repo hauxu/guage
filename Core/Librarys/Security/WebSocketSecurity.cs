@@ -31,6 +31,22 @@ namespace Core.Librarys.Security
             return _token;
         }
 
+        /// <summary>
+        /// 浏览器扩展的 Origin 形如 chrome-extension://&lt;32 位 a-p&gt;（Firefox 是 UUID）。
+        /// 只做格式校验、不绑定具体扩展 ID：未打包的开发扩展 ID 也是随机生成的，
+        /// 写死 ID 会把本地加载的用户挡在外面。带路径/参数的 Origin 一律拒绝。
+        /// </summary>
+        private static readonly System.Text.RegularExpressions.Regex ExtensionOriginRegex =
+            new System.Text.RegularExpressions.Regex(
+                @"^(chrome|edge)-extension://[a-p]{32}/?$|^moz-extension://[0-9a-fA-F\-]{36}/?$",
+                System.Text.RegularExpressions.RegexOptions.Compiled
+                | System.Text.RegularExpressions.RegexOptions.CultureInvariant);
+
+        public static bool IsExtensionOrigin(string origin)
+        {
+            return !string.IsNullOrWhiteSpace(origin) && ExtensionOriginRegex.IsMatch(origin.Trim());
+        }
+
         public static bool ValidateToken(string token)
         {
             return !string.IsNullOrEmpty(_token)

@@ -26,9 +26,10 @@ namespace Core.Servicers.Instances
                 return true;
             }
 
-            return origin.StartsWith("chrome-extension://", StringComparison.OrdinalIgnoreCase)
-                || origin.StartsWith("edge-extension://", StringComparison.OrdinalIgnoreCase)
-                || origin.StartsWith("moz-extension://", StringComparison.OrdinalIgnoreCase);
+            //  只有"协议前缀"判断太松：任意 chrome-extension://xxx 都能过。
+            //  改为校验完整形状（32 位 a-p 的 chrome/edge 扩展 ID、或 Firefox 的 UUID），
+            //  带路径或参数的 Origin 直接拒绝
+            return WebSocketSecurity.IsExtensionOrigin(origin);
         }
 
         protected override void OnOpen()
