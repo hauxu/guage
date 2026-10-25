@@ -14,7 +14,9 @@ namespace Core.Servicers.Instances
         private readonly object _ignoreCacheLocker = new object();
         //  忽略缓存只是加速手段：用 HashSet 做 O(1) 查找，并有容量上限，满了整表清空
         private HashSet<string> _ignoreURLCache;
-        private List<Regex> _compiledIgnoreRegexList = new List<Regex>();
+        //  与 _domainIgnoreSnapshot 同理：重建时整体替换引用，WS 线程读到的一直是完整列表。
+        //  直接 Clear+Add 会让并发 foreach 抛异常，半清空期间本该忽略的 URL 反而被放行
+        private volatile List<Regex> _compiledIgnoreRegexList = new List<Regex>();
         //  忽略域名快照：重建时整体替换引用（不可变快照），WS 线程与 UI 线程读写无竞态
         private volatile List<string> _domainIgnoreSnapshot = new List<string>();
         //  默认忽略的规则
@@ -60,7 +62,7 @@ namespace Core.Servicers.Instances
 
         private void RebuildCompiledRegexList()
         {
-            _compiledIgnoreRegexList.Clear();
+            var next = new List<Regex>();
             var config = _appConfig.GetConfig();
             var ignoreURLList = config?.Behavior?.IgnoreURLList ?? new List<string>();
 
@@ -73,13 +75,16 @@ namespace Core.Servicers.Instances
             {
                 try
                 {
-                    _compiledIgnoreRegexList.Add(new Regex(pattern, RegexOptions.Compiled | RegexOptions.CultureInvariant, RegexTimeout));
+                    next.Add(new Regex(pattern, RegexOptions.Compiled | RegexOptions.CultureInvariant, RegexTimeout));
                 }
                 catch (Exception ex)
                 {
                     Logger.Error("忽略 URL 正则无效，已跳过：" + pattern + "。" + ex.Message);
                 }
             }
+
+            //  整体发布：此后读到的要么是旧列表、要么是新列表，不会是半成品
+            _compiledIgnoreRegexList = next;
         }
 
         public bool IsIgnore(string url_)

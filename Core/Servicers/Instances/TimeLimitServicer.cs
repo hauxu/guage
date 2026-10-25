@@ -146,7 +146,13 @@ namespace Core.Servicers.Instances
                 TimeLimitRuleModel rule = _rules.FirstOrDefault(m => GetRuleKey(m) == ruleKey);
                 string appName = rule != null && !string.IsNullOrWhiteSpace(rule.Name) ? rule.Name : processName;
                 TimeLimitLogger.LogExtension(appName, processName, minutes);
+
+                //  延长量必须落盘：只改内存的话，重启应用或重启系统就会回到超限状态
+                AddTodayExtension(ruleKey, minutes);
             }
+
+            //  文件写入放到锁外，避免长时间持有 _syncRoot
+            _appConfig.Save();
         }
 
         /// <summary>
@@ -247,6 +253,11 @@ namespace Core.Servicers.Instances
 
                         string ruleKey = GetRuleKey(rule);
                         int usage = usageMap.TryGetValue(rule.ProcessName, out int restored) ? restored : 0;
+
+                        //  扣掉当日已延长的部分：否则重启后按数据库原始用量重新判超限，
+                        //  用户点过的"延长"等于白点（随机密码还可能已经被用掉）
+                        usage = Math.Max(0, usage - GetTodayExtensionSeconds(ruleKey));
+
                         _todayUsageSeconds[ruleKey] = usage;
 
                         int limitSeconds = Math.Max(1, rule.LimitMinutes) * 60;
@@ -749,6 +760,47 @@ namespace Core.Servicers.Instances
                 case TimeLimitAction.LockOverlay: return "锁定遮罩";
                 default: return "仅提示";
             }
+        }
+
+        private static int TodayKey()
+        {
+            DateTime now = DateTime.Now;
+            return now.Year * 10000 + now.Month * 100 + now.Day;
+        }
+
+        /// <summary>
+        /// 当日对某条规则的延长秒数；跨天自动视为 0
+        /// </summary>
+        private int GetTodayExtensionSeconds(string ruleKey)
+        {
+            TimeLimitSettingsModel settings = _appConfig.GetConfig()?.TimeLimit;
+            if (settings?.TodayExtensions == null || settings.TodayExtensionsDate != TodayKey())
+            {
+                return 0;
+            }
+
+            return settings.TodayExtensions.TryGetValue(ruleKey ?? string.Empty, out int minutes)
+                ? Math.Max(0, minutes) * 60
+                : 0;
+        }
+
+        private void AddTodayExtension(string ruleKey, int minutes)
+        {
+            TimeLimitSettingsModel settings = _appConfig.GetConfig()?.TimeLimit;
+            if (settings == null || string.IsNullOrEmpty(ruleKey) || minutes <= 0)
+            {
+                return;
+            }
+
+            if (settings.TodayExtensions == null || settings.TodayExtensionsDate != TodayKey())
+            {
+                //  换天了：昨天的延长一律作废
+                settings.TodayExtensions = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+                settings.TodayExtensionsDate = TodayKey();
+            }
+
+            settings.TodayExtensions.TryGetValue(ruleKey, out int current);
+            settings.TodayExtensions[ruleKey] = current + Math.Max(1, minutes);
         }
 
         private string ResolveRuleKey(string processName, string executablePath)

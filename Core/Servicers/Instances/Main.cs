@@ -134,7 +134,13 @@ namespace Core.Servicers.Instances
             if (oldConfig.General.IsStartatboot != newConfig.General.IsStartatboot)
             {
                 //  处理开机自启：仅在开关实际变化时重建计划任务
-                SystemCommon.SetStartup(newConfig.General.IsStartatboot);
+                if (!SystemCommon.SetStartup(newConfig.General.IsStartatboot))
+                {
+                    //  写计划任务需要提权，失败很常见。不回滚的话开关显示“已开启”、
+                    //  实际开机不会启动；这里只回滚内存值，不在 ConfigChanged 里再 Save（会递归）
+                    newConfig.General.IsStartatboot = oldConfig.General.IsStartatboot;
+                    Logger.Error("设置开机自启失败，已回滚开关状态（写入计划任务需要管理员权限）");
+                }
             }
 
             //  更新忽略规则

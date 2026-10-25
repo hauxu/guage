@@ -50,8 +50,10 @@ namespace Core.Servicers.Instances
                         return;
                     }
 
-                    //  更新app累计总时长
-                    app.TotalTime += duration_;
+                    //  累计总时长只加"真正落库"的量：日桶有 86400 上限，关联进程重复记账时
+                    //  被钳掉的部分若仍计入 TotalTime，就会出现 TotalTime > ΣDailyLog，
+                    //  之后 ClearRange 一重算，用户会看到"清别的月份，这个应用反而少了"
+                    int writtenDaily = 0;
 
                     //  更新每日数据
                     var dailyLogs = db.DailyLog.Where(m => m.Date >= startTime_.Date && m.Date <= endDayTime && m.AppModelID == app.ID).ToList();
@@ -67,11 +69,14 @@ namespace Core.Servicers.Instances
                                 AppModelID = app.ID,
                                 Time = item.Value,
                             });
+                            writtenDaily += item.Value;
                         }
                         else
                         {
+                            int before = log.Time;
                             int time = log.Time + item.Value;
                             log.Time = time > 86400 ? 86400 : time;
+                            writtenDaily += log.Time - before;
                         }
                     }
                     //  更新时段数据
@@ -96,6 +101,8 @@ namespace Core.Servicers.Instances
                             log.Time = time > 3600 ? 3600 : time;
                         }
                     }
+                    app.TotalTime += writtenDaily;
+
                     db.SaveChanges();
                 });
             }

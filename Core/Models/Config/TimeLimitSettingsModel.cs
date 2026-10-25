@@ -26,6 +26,16 @@ namespace Core.Models.Config
         /// <summary>
         /// 随机密码是否已查看（查看后失效，无法再次查看）
         /// </summary>
-        public bool RandomPasswordViewed { get; set; } = false;
+                /// <summary>
+        /// 当日已延长的分钟数（规则键 → 分钟）。只对 TodayExtensionsDate 那天有效
+        /// </summary>
+        public Dictionary<string, int> TodayExtensions { get; set; } = new Dictionary<string, int>();
+
+        /// <summary>
+        /// TodayExtensions 归属日期（yyyyMMdd），跨天即作废
+        /// </summary>
+        public int TodayExtensionsDate { get; set; }
+
+public bool RandomPasswordViewed { get; set; } = false;
     }
 }
