@@ -256,20 +256,6 @@ namespace Core.Librarys.SQLite
 
 
 
-        private string SQLiteEscape(string str)
-        {
-            str = str.Replace("/", "//");
-            str = str.Replace("'", "''");
-            str = str.Replace("[", "/[");
-            str = str.Replace("]", "/]");
-            str = str.Replace("%", "/%");
-            str = str.Replace("&", "/&");
-            str = str.Replace("_", "/_");
-            str = str.Replace("(", "/(");
-            str = str.Replace(")", "/)");
-            return str;
-        }
-
         #region 是否需要处理
         /// <summary>
         /// 判断是否需要处理数据，比对core程序集版本号（只检测，不写版本文件；
@@ -380,30 +366,6 @@ namespace Core.Librarys.SQLite
         #endregion
 
         #region 判断表是否存在数据库中
-        /// <summary>
-        /// 判断表是否存在数据库中
-        /// </summary>
-        /// <param name="tableName"></param>
-        /// <returns></returns>
-        private bool IsTableExistDb(string tableName)
-        {
-            using (var con = new SQLiteConnection(@"Data Source=.\data.db"))
-            {
-                con.Open();
-                using (var cmd = new SQLiteCommand(con))
-                {
-                    cmd.CommandText = "select count(*)  from sqlite_master where type='table' and name = 'StatisticModels3'";
-                    var rd = cmd.ExecuteReader();
-                    if (rd.Read())
-                    {
-                        var count = rd.GetInt32(0);
-                        return count > 0;
-                    }
-                    return false;
-                }
-
-            }
-        }
 
         #endregion
 

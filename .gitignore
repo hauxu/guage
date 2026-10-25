@@ -372,3 +372,6 @@ WebExtensions/
 
 # 代理工具运行记录（仅本机）
 .mimosa/
+
+# cmd 的 "> nul" 误用会真的生成这个文件
+nul

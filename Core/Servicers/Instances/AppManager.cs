@@ -103,7 +103,6 @@ namespace Core.Servicers.Instances
                     //  uwp应用：单次尝试解析（原实现在此 Thread.Sleep 轮询最长 5 秒会阻塞 UI 线程；
                     //  解析失败时由 AppObserver 的 1 秒兜底轮询在下一次前台变化时重试）
                     executablePath = GetUWPAPPExecutablePath(hwnd_, (uint)processId);
-                    appType = AppType.UWP;
 
                     if (string.IsNullOrEmpty(executablePath))
                     {
@@ -226,7 +225,12 @@ namespace Core.Servicers.Instances
                 {
                     int capacity = 2000;
                     StringBuilder sb = new StringBuilder(capacity);
-                    QueryFullProcessImageName(proc, 0, sb, ref capacity);
+                    if (!QueryFullProcessImageName(proc, 0, sb, ref capacity) || capacity <= 0)
+                    {
+                        //  失败时 capacity 不会被回写、仍等于缓冲长度，按它切片会越界；
+                        //  异常被上层吞掉后，真正的原因（权限不足/进程已退出）就看不见了
+                        return null;
+                    }
                     return sb.ToString(0, capacity);
                 }
                 finally

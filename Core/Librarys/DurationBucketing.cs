@@ -53,6 +53,10 @@ namespace Core.Librarys
         /// <summary>
         /// 按天拆分。days 的键为日期（当天 00:00）。
         /// </summary>
+        /// <summary>
+        /// 按自然日切分时长。一天固定按 86400 秒处理，即假定所在时区没有夏令时；
+        /// 有夏令时的地区在切换日会差 3600 秒（当前只面向无 DST 的区域，不额外处理）。
+        /// </summary>
         public static void SplitDays(DateTime startTime, int duration,
             out Dictionary<DateTime, int> days, out DateTime endDayTime)
         {

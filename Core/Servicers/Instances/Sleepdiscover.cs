@@ -403,16 +403,23 @@ namespace Core.Servicers.Instances
         }
 
         /// <summary>
-        /// 指示是否键盘行为超时（超过10分钟）
+        /// 键盘多久没动静算离开。Debug 下取 10 秒便于验证，但必须和 Release
+        /// 走同一个判定，否则两套构建行为不一致（调试时统计会莫名中断）
+        /// </summary>
+#if DEBUG
+        private const int KeyboardIdleSeconds = 10;
+#else
+        private const int KeyboardIdleSeconds = 600;
+#endif
+
+        /// <summary>
+        /// 指示是否键盘行为超时
         /// </summary>
         /// <returns>超时返回true</returns>
         private bool IsKeyboardOuttime()
         {
             TimeSpan timeSpan = DateTime.Now - pressKeyboardLastTime;
-#if DEBUG
-            return timeSpan.TotalSeconds >= 10;
-#endif
-            return timeSpan.TotalMinutes >= 10;
+            return timeSpan.TotalSeconds >= KeyboardIdleSeconds;
         }
     }
 }
