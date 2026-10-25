@@ -591,7 +591,11 @@ namespace Core.Servicers.Instances
 
             using (var db = _database.GetReaderContext())
             {
-                var day = db.DailyLog.Where(m => m.Date >= start.Date && m.Date <= end.Date)
+                //  Include + AsNoTracking：否则 ToList() 之后每行再懒加载 AppModel/Category，
+                //  导一年数据就是上万次往返查询（导出按钮假死的原因）
+                var day = db.DailyLog.AsNoTracking()
+                    .Include(m => m.AppModel.Category)
+                    .Where(m => m.Date >= start.Date && m.Date <= end.Date)
                     .ToList()
                     .Select(m => new
                     {
@@ -602,7 +606,9 @@ namespace Core.Servicers.Instances
                         分类 = m.AppModel != null && m.AppModel.Category != null ? m.AppModel.Category.Name : "未知"
                     });
 
-                var hours = db.HoursLog.Where(m => m.DataTime >= start && m.DataTime <= end)
+                var hours = db.HoursLog.AsNoTracking()
+                    .Include(m => m.AppModel.Category)
+                    .Where(m => m.DataTime >= start && m.DataTime <= end)
                     .ToList()
                     .Select(m => new
                     {

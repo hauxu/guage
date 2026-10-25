@@ -114,14 +114,54 @@ namespace Core.Librarys.SQLite
 
                 IsSelfChecking = false;
 
+                if (res)
+                {
+                    EnsureIndexes();
+                }
+
                 return res;
             }
+
+            //  库结构已是最新，但索引仍要补一次（幂等 DDL）：只把它放在迁移分支里，
+            //  从旧版本升上来的库永远建不上索引
+            EnsureIndexes();
 
             IsSelfChecking = false;
 
             return true;
         }
 
+        /// <summary>
+        /// 建索引（幂等）。此前全库没有任何索引，HoursLog 随使用时长能涨到百万行，
+        /// 每次前后台切换都要全表扫；这几个覆盖热点查询的等值 + 区间条件。
+        /// </summary>
+        private void EnsureIndexes()
+        {
+            string[] sqls =
+            {
+                "CREATE INDEX IF NOT EXISTS idx_dailylog_app_date ON DailyLogModels (AppModelID, Date)",
+                "CREATE INDEX IF NOT EXISTS idx_hourslog_app_time ON HoursLogModels (AppModelID, DataTime)",
+                "CREATE INDEX IF NOT EXISTS idx_weblog_url_time ON WebBrowseLogModels (UrlId, LogTime)",
+                "CREATE INDEX IF NOT EXISTS idx_app_name ON AppModels (Name)"
+            };
+
+            foreach (string sql in sqls)
+            {
+                try
+                {
+                    ExecuteNonQuery(sql);
+                }
+                catch (Exception ex)
+                {
+                    //  索引只影响性能，建不出来不该拦住启动
+                    Logger.Error("创建索引失败：" + sql + " " + ex.Message);
+                }
+            }
+        }
+
+        /// <summary>
+        /// 处理表变化（仅处理新增表、新增字段、表结构变化）
+        /// </summary>
         /// <summary>
         /// 处理表变化（仅处理新增表、新增表字段、表结构变化）
         /// </summary>

@@ -12,7 +12,8 @@ namespace Core.Servicers.Instances
     {
         private readonly IAppConfig _appConfig;
         private readonly object _ignoreCacheLocker = new object();
-        private List<string> _ignoreURLCache;
+        //  忽略缓存只是加速手段：用 HashSet 做 O(1) 查找，并有容量上限，满了整表清空
+        private HashSet<string> _ignoreURLCache;
         private List<Regex> _compiledIgnoreRegexList = new List<Regex>();
         //  忽略域名快照：重建时整体替换引用（不可变快照），WS 线程与 UI 线程读写无竞态
         private volatile List<string> _domainIgnoreSnapshot = new List<string>();
@@ -27,7 +28,7 @@ namespace Core.Servicers.Instances
 
         public void Init()
         {
-            _ignoreURLCache = new List<string>();
+            _ignoreURLCache = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             _appConfig.ConfigChanged += _appConfig_ConfigChanged;
             RebuildCompiledRegexList();
             RebuildDomainSnapshot();
@@ -98,21 +99,13 @@ namespace Core.Servicers.Instances
 
             if (IsDomainIgnore(url_))
             {
-                lock (_ignoreCacheLocker)
-                {
-                    _ignoreURLCache.Add(url_);
-                }
-
+                CacheIgnoredUrl(url_);
                 return true;
             }
 
             if (IsRegexIgnore(url_))
             {
-                lock (_ignoreCacheLocker)
-                {
-                    _ignoreURLCache.Add(url_);
-                }
-
+                CacheIgnoredUrl(url_);
                 return true;
             }
 
@@ -146,5 +139,21 @@ namespace Core.Servicers.Instances
 
             return false;
         }
+        private const int IgnoreCacheLimit = 4096;
+
+        private void CacheIgnoredUrl(string url)
+        {
+            lock (_ignoreCacheLocker)
+            {
+                if (_ignoreURLCache.Count >= IgnoreCacheLimit)
+                {
+                    //  缓存不是必需品：满了直接清空，免得无界增长成内存与线性查找的双重负担
+                    _ignoreURLCache.Clear();
+                }
+
+                _ignoreURLCache.Add(url);
+            }
+        }
+
     }
 }
