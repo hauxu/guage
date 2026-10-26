@@ -38,6 +38,11 @@ namespace UI
         {
             FileHelper.Initialize();
 
+            //  非 UI 线程兜底：System.Timers.Timer 回调、后台 Task 抛出的异常不走
+            //  DispatcherUnhandledException，不挂这两个钩子就是静默崩溃、日志都没有
+            AppDomain.CurrentDomain.UnhandledException += App_DomainUnhandledException;
+            TaskScheduler.UnobservedTaskException += App_UnobservedTaskException;
+
             DispatcherUnhandledException += App_DispatcherUnhandledException;
 
             var serviceCollection = new ServiceCollection();
@@ -78,6 +83,37 @@ namespace UI
             base.OnExit(e);
             Logger.Save(true);
         }
+        /// <summary>
+        /// 后台线程兜底：只求救得下日志，这类异常无法继续执行，交给系统终止。
+        /// </summary>
+        private void App_DomainUnhandledException(object sender, UnhandledExceptionEventArgs e)
+        {
+            try
+            {
+                Logger.Error("[后台线程异常] " + (e.ExceptionObject as Exception));
+                Logger.Save(true);
+            }
+            catch
+            {
+                //  兜底里再抛就真没救了
+            }
+        }
+
+        /// <summary>
+        /// 没有 await 的 Task 异常：标记已观察，避免进程被带走，同时留一条记录。
+        /// </summary>
+        private void App_UnobservedTaskException(object sender, UnobservedTaskExceptionEventArgs e)
+        {
+            e.SetObserved();
+            try
+            {
+                Logger.Error("[未观察的 Task 异常] " + e.Exception);
+            }
+            catch
+            {
+            }
+        }
+
         private void App_DispatcherUnhandledException(object sender, System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e)
         {
             e.Handled = true;
