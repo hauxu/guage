@@ -813,6 +813,11 @@ namespace UI.Controls.SettingPanel
             description.Text = configAttribute.Description;
             description.Margin = new Thickness(10, 10, 10, 0);
             description.SetResourceReference(TextBlock.ForegroundProperty, "SubTextBrush");
+            //  没有说明就不要留一个空块，否则每行都会多出一段空隙
+            if (string.IsNullOrEmpty(configAttribute.Description))
+            {
+                description.Visibility = Visibility.Collapsed;
+            }
             var container = new StackPanel();
 
             var head = new Grid();

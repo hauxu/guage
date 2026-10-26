@@ -121,7 +121,9 @@ namespace UI.Base
         /// 因此必须保留一点着色，模糊才会真正渲染出来。
         /// 48/255≈19%：最透明档仍保有足够底色，背后桌面的深色内容不会以"纯模糊残影"的形式透出。
         /// </summary>
-        public const byte MinimumTintAlpha = 12;
+        //  着色 alpha 的下限。低于阈值时 DWM 的 acrylic 会退化成整片黑块
+        //  （真机实测：滑到最透明一档时整窗发黑），所以必须留在这个值之上
+        public const byte MinimumTintAlpha = 48;
 
         //  同值守卫 + 提交限流：SetWindowCompositionAttribute 每次调用都会让 DWM
         //  拆建模糊区（中间帧发黑），拖动滑块时必须合并提交

@@ -250,7 +250,7 @@
                     <Grid>
                         <TextBlock Text="提醒记录" FontSize="{DynamicResource AppFontSizeBody}" FontWeight="SemiBold"/>
                         <TextBlock HorizontalAlignment="Right" Style="{StaticResource PageHint}"
-                                   Text="最近 20 条 · 完整台账保存在 Data\BreakReminderRecords.json"/>
+                                   Text="最近 20 条"/>
                     </Grid>
                     <ListBox ItemsSource="{Binding Records}" Margin="0,10,0,0"
                              MinHeight="96" MaxHeight="140"

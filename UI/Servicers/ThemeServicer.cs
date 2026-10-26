@@ -182,6 +182,9 @@ public void ApplyAppearancePreview(bool committed = true)
         /// 透明度 0 时各层完全不透明，等同于纯色亚克力；100 时完全透明，只剩模糊。
         /// 各层叠加的层数不同，因此越靠内的表面实际越实，正文区域的可读性由此保证。
         /// </summary>
+        //  承载文字的面板最低不透明度：玻璃可以透到 5%，但读字的地方要留住底
+        private const byte SurfaceMinAlpha = 118;
+
         //  1px 框线：这些跟着滑块淡到底会消失，需要单独托底
         private static readonly HashSet<string> HairlineKeys = new HashSet<string>(StringComparer.Ordinal)
         {
@@ -230,6 +233,12 @@ public void ApplyAppearancePreview(bool committed = true)
                             //  但也不能钉死一个固定值，否则滑块到头时只剩一圈线框。
                             //  取"内容 alpha 的两倍 + 一点底"，随滑块一起走
                             keyAlpha = (byte)Math.Min(255, Math.Max(alpha, alpha * 2 + 20));
+                        }
+                        else
+                        {
+                            //  卡片、列表、输入框这些"要读字的地方"单独托底：
+                            //  跟玻璃一起压到底的话，说明文字会整片消失、层次也糊成一块
+                            keyAlpha = Math.Max(keyAlpha, SurfaceMinAlpha);
                         }
                         target = CreateTintBrush(themeDict[key] as SolidColorBrush, keyAlpha);
                     }

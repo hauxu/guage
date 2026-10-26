@@ -11,12 +11,12 @@ namespace Core.Models.Config
     /// </summary>
     public class BehaviorModel
     {
-        [Config(Name = "睡眠监测", Description = "离开电脑时自动停止统计，重启软件生效。（一般情况不建议关闭）", Group = "偏好")]
+        [Config(Name = "睡眠监测", Description = "离开电脑时自动停止统计，重启软件生效", Group = "偏好")]
         /// <summary>
         /// 睡眠监测
         /// </summary>
         public bool IsSleepWatch { get; set; } = true;
-        [Config(IsCanImportExport = true, Name = "忽略应用", Description = "可以通过进程名称或者正则表达式进行匹配。当使用正则表达式时可以匹配程序路径", Group = "忽略应用", Placeholder = "进程名称，不需要输入.exe。支持正则表达式")]
+        [Config(IsCanImportExport = true, Name = "忽略应用", Description = "支持进程名或正则表达式（正则匹配程序路径）", Group = "忽略应用", Placeholder = "进程名称，不需要输入.exe。支持正则表达式")]
         /// <summary>
         /// 忽略的进程列表
         /// </summary>
@@ -33,7 +33,7 @@ namespace Core.Models.Config
         /// 睡眠监测
         /// </summary>
         public bool IsWhiteList { get; set; } = false;
-        [Config(IsCanImportExport = true, Name = "应用白名单", Description = "可以通过进程名称或者正则表达式进行匹配，当使用正则表达式时可以匹配程序路径", Group = "应用白名单", Placeholder = "进程名称，不需要输入.exe。支持正则表达式")]
+        [Config(IsCanImportExport = true, Name = "应用白名单", Description = "支持进程名或正则表达式（正则匹配程序路径）", Group = "应用白名单", Placeholder = "进程名称，不需要输入.exe。支持正则表达式")]
         /// <summary>
         /// 应用白名单
         /// </summary>

@@ -417,11 +417,11 @@
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,5,0,3">
                         <Button x:Name="RandomModeButton" Style="{StaticResource ModeToggle}"
                                 Content="随机模式" Background="#0E3355" Foreground="#9FC7E6"
-                                Click="RandomModeButton_Click" ToolTip="圈随左右涡流任意飘飞，主打趣味"/>
+                                Click="RandomModeButton_Click" ToolTip="圈随涡流任意飘飞"/>
                         <Button x:Name="FixedModeButton" Style="{StaticResource ModeToggle}"
                                 Content="固定模式" Margin="4,0,0,0" Background="#2FA3D8"
                                 Foreground="#FFFFFF" Click="FixedModeButton_Click"
-                                ToolTip="每泵一次必有一圈套上对应柱，主打快速设定"/>
+                                ToolTip="每泵必有一圈套上对应柱"/>
                     </StackPanel>
                     <TextBlock x:Name="UnitText" FontSize="{DynamicResource AppFontSizeCaption}"
                                Foreground="#D8EDF9" HorizontalAlignment="Center" Margin="2,3,2,6"

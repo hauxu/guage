@@ -332,7 +332,7 @@
                                                                  Text="{Binding CountdownOpacityText, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
                                                 </StackPanel>
                                                 <CheckBox Content="三击隐藏倒计时窗" IsChecked="{Binding HideByTripleClick, Mode=TwoWay}" Margin="0,6,0,0"
-                                                          ToolTip="仅作用于倒计时窗；锁定遮罩不提供隐藏入口（安全优先）"/>
+                                                          ToolTip="仅作用于倒计时窗，锁定遮罩不可隐藏"/>
                                                 <CheckBox Content="结束后禁止再次启动" IsChecked="{Binding BanRestart, Mode=TwoWay}" Margin="0,6,0,0"/>
                                             </StackPanel>
                                         </base:View>
@@ -396,7 +396,7 @@
                                 <TextBlock Margin="0,10,0,0" FontSize="{DynamicResource AppFontSizeSecondary}" TextAlignment="Center"
                                            Foreground="{DynamicResource SubTextBrush}" TextWrapping="Wrap"
                                            MaxWidth="320"
-                                           Text="正在读取开始菜单与已安装程序列表，请稍候..."/>
+                                           Text="正在扫描…"/>
                             </StackPanel>
                         </Border>
                         <Grid Visibility="{Binding PickerListVisibility}" VerticalAlignment="Stretch">
