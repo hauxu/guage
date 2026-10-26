@@ -55,6 +55,15 @@ namespace UI.Base
             public int SizeOfData;
         }
 
+        [DllImport("gdi32.dll")]
+        private static extern IntPtr CreateRoundRectRgn(int left, int top, int right, int bottom, int width, int height);
+
+        [DllImport("gdi32.dll")]
+        private static extern bool DeleteObject(IntPtr hObject);
+
+        [DllImport("user32.dll")]
+        private static extern int SetWindowRgn(IntPtr hWnd, IntPtr hRgn, bool bRedraw);
+
         [DllImport("user32.dll")]
         private static extern int SetWindowCompositionAttribute(IntPtr hwnd, ref WindowCompositionAttributeData data);
 
@@ -282,6 +291,65 @@ namespace UI.Base
         /// <summary>
         /// 同步系统绘制部分的深浅色，避免深色主题下窗口外框仍是浅色。
         /// </summary>
+        /// <summary>
+        /// 当前是否已提交过"开着的"着色。accent 是 DWM 画在窗口矩形上的一层，
+        /// 它不认 WPF 的圆角；所以只有它开着时才需要额外裁窗口区域。
+        /// </summary>
+        public static bool IsTintActive => _hasSubmitted && _lastEnabled;
+
+        /// <summary>
+        /// 用窗口区域把整窗裁成圆角。DWM 的 accent 着色层是按矩形铺的，
+        /// 光靠 WPF 的 CornerRadius 只能裁掉自己的内容——底下那层底色仍是直角，
+        /// 看起来就是"上面圆角、下面露出直角"。SetWindowRgn 之后系统会连
+        /// accent 一起裁，两层才对得上。代价：区域是硬边（无抗锯齿）。
+        /// </summary>
+        public static void ApplyRoundedRegion(System.Windows.Window window, double dipWidth, double dipHeight, double dipInset, int cornerRadius)
+        {
+            if (window == null)
+            {
+                return;
+            }
+
+            IntPtr hwnd = new WindowInteropHelper(window).Handle;
+            if (hwnd == IntPtr.Zero)
+            {
+                return;
+            }
+
+            if (cornerRadius <= 0 || dipWidth <= 0 || dipHeight <= 0)
+            {
+                //  直角模式/尺寸无效：清掉区域，恢复系统默认
+                SetWindowRgn(hwnd, IntPtr.Zero, true);
+                return;
+            }
+
+            //  DIP → 设备像素（多显示器不同缩放时以本窗口所在屏为准）
+            double scaleX = 1, scaleY = 1;
+            var source = System.Windows.PresentationSource.FromVisual(window);
+            if (source?.CompositionTarget != null)
+            {
+                scaleX = source.CompositionTarget.TransformToDevice.M11;
+                scaleY = source.CompositionTarget.TransformToDevice.M22;
+            }
+
+            int width = (int)Math.Round(dipWidth * scaleX);
+            int height = (int)Math.Round(dipHeight * scaleY);
+            //  外发光阴影要留在区域外沿，否则关掉玻璃后整窗没有投影
+            int radius = (int)Math.Round((cornerRadius + dipInset) * Math.Max(scaleX, scaleY));
+
+            IntPtr region = CreateRoundRectRgn(0, 0, width + 1, height + 1, radius * 2, radius * 2);
+            if (region == IntPtr.Zero)
+            {
+                return;
+            }
+
+            //  SetWindowRgn 成功后区域归系统所有，不要自己 DeleteObject
+            if (SetWindowRgn(hwnd, region, true) == 0)
+            {
+                DeleteObject(region);
+            }
+        }
+
         public static void SetDarkMode(System.Windows.Window window, bool isDark)
         {
             if (window == null || !IsSupported)

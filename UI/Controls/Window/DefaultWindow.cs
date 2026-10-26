@@ -217,6 +217,10 @@ namespace UI.Controls.Window
         private void ApplyBackdrop()
         {
             UI.Base.WindowBackdrop.Apply(this, acrylicEnabled, acrylicTint, acrylicTintAlpha);
+
+            //  着色层是 DWM 画在窗口矩形上的，不认 WPF 圆角：
+            //  开/关都要同步一次，让窗口区域裁剪跟着变
+            ApplyGlassLayering(acrylicEnabled && UI.Base.WindowBackdrop.IsSupported);
         }
 
         /// <summary>
@@ -331,9 +335,28 @@ namespace UI.Controls.Window
         //  任意半径平滑抗锯齿——不再受 DWM 直角/4px/8px 三档限制
         private int configuredCornerRadius = 12;
 
+        //  玻璃着色是否开着：由 ThemeServicer 在提交 accent 后显式告知，
+        //  比读 WindowBackdrop 里的静态缓存可靠（提交失败时缓存会滞后）
+        private bool glassLayeringActive;
+
         /// <summary>
         /// 应用窗口圆角配置。最大化时自动切换为直角。
         /// </summary>
+        /// <summary>
+        /// 告知窗口当前是否开着毛玻璃着色。玻璃层是 DWM 按矩形铺的，
+        /// 只有它开着时才需要把整窗裁成圆角（否则白丢抗锯齿）。
+        /// </summary>
+        public void ApplyGlassLayering(bool isActive)
+        {
+            if (glassLayeringActive == isActive)
+            {
+                return;
+            }
+
+            glassLayeringActive = isActive;
+            UpdateRoundedCorners();
+        }
+
         public void ApplyCornerRadius(int radius)
         {
             configuredCornerRadius = Math.Max(0, Math.Min(24, radius));
@@ -358,6 +381,19 @@ namespace UI.Controls.Window
             //  layered 窗口 DWM 圆角偏好无效；恒传 DONOTROUND，
             //  防止系统 8px 档裁切与更大的 WPF 半径打架
             UI.Base.WindowBackdrop.SetRoundedCorners(this, 0, WindowState != WindowState.Maximized);
+
+            //  玻璃着色是 DWM 按矩形铺的一层，不认 WPF 圆角：只在它开着时
+            //  额外把整窗区域裁成圆角，否则关玻璃后白丢抗锯齿
+            if (glassLayeringActive && radius > 0)
+            {
+                //  内缩 0：区域要正好贴住卡片的圆角，否则着色层的直角还会露在
+                //  区域圆角与卡片圆角之间那条缝里（就是"上面圆角、下面直角"的观感）
+                UI.Base.WindowBackdrop.ApplyRoundedRegion(this, ActualWidth, ActualHeight, 0, radius);
+            }
+            else
+            {
+                UI.Base.WindowBackdrop.ApplyRoundedRegion(this, 0, 0, 0, 0);
+            }
         }
 
         //  上次 Clip 尺寸/半径：未变时跳过重建（缩放时每像素都触发 SizeChanged）

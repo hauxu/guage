@@ -1081,6 +1081,7 @@ namespace UI.Controls.Window
                         {
                             ring.State = StateBallistic;
                             ring.Guided = false;
+                            ring.Idle = 0;
                             ring.AngVel = (_random.Next(2) == 0 ? 1 : -1) * (120 + _random.NextDouble() * 180);
                             ring.PrevY = ring.Y;
                         }
@@ -1131,6 +1132,7 @@ namespace UI.Controls.Window
                         if (ring.Y < TipY - 12)
                         {
                             ring.State = StateBallistic;
+                            ring.Idle = 0;
                             ring.Vx += (_random.NextDouble() - 0.5) * 60;
                             ring.AngVel = (_random.Next(2) == 0 ? 1 : -1) * (140 + _random.NextDouble() * 200);
                             ring.PrevY = ring.Y;
@@ -1217,6 +1219,18 @@ namespace UI.Controls.Window
                             }
                         }
                         ring.PrevY = ring.Y;
+
+                        //  超时兜底：圈可能压在别的圈上、永远触不到箱底，
+                        //  此态只吃 0.22 倍流场力 —— 不兜底就是永久卡死（多泵几轮必现）
+                        ring.Idle += dt;
+                        bool restingOnPile = ring.Idle > 1.2 && Math.Abs(ring.Vx) + Math.Abs(ring.Vy) < 70;
+                        if (restingOnPile || ring.Idle > 9)
+                        {
+                            ring.State = StateFloat;
+                            ring.Guided = false;
+                            ring.Idle = 0;
+                            ring.BaseY = FloatTop + (FloatBottom - FloatTop) * (0.05 + 0.9 * _random.NextDouble());
+                        }
 
                         //  兜底：贴底且几乎不动时也回漂浮态。落地分支依赖精确触底，
                         //  一旦因为数值抖动错过，圈会永久停在 Ballistic（贴底不动）
