@@ -19,6 +19,7 @@
                 <ControlTemplate TargetType="{x:Type Button}">
                     <Border 
                         Background="{TemplateBinding Background}"
+                                        CornerRadius="4"
                                         SnapsToDevicePixels="true">
                         <ContentPresenter Name="Presenter" Margin="{TemplateBinding Padding}"
                                           VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
@@ -138,7 +139,7 @@
                                             <!--标题区域-->
                                             <StackPanel Orientation="Horizontal" Margin="15,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Center">
 
-                                                <button:IconButton Width="0" VerticalAlignment="Center" ToolTip="返回" FontSize="10" x:Name="BackBtn" Icon="Back"  WindowChrome.IsHitTestVisibleInChrome="True" Command="{x:Static w:DefaultWindowCommands.BackCommand}"/>
+                                                <button:IconButton Width="26" Height="26" Margin="0,0,4,0" VerticalAlignment="Center" ToolTip="返回" FontSize="10" x:Name="BackBtn" Icon="Back"  WindowChrome.IsHitTestVisibleInChrome="True" Command="{x:Static w:DefaultWindowCommands.BackCommand}"/>
 
                                                 <Image Source="{TemplateBinding Icon}" VerticalAlignment="Center" Stretch="Uniform" Width="18"/>
                                                 <TextBlock VerticalAlignment="Center" Text="{TemplateBinding Title}" IsEnabled="{TemplateBinding IsActive}" Foreground="{DynamicResource DefaultTextBrush}" Margin="15,0,0,0"/>

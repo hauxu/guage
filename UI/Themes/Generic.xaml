@@ -1,5 +1,31 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- ToolTip：默认样式是白底黑边直角，和整体界面完全不搭。
+          这里统一成圆角·主题底色·留白，并给一点投影。 -->
+    <Style TargetType="{x:Type ToolTip}">
+        <Setter Property="Foreground" Value="{DynamicResource StandardTextBrush}"/>
+        <Setter Property="FontSize" Value="{DynamicResource AppFontSizeSecondary}"/>
+        <Setter Property="MaxWidth" Value="360"/>
+        <Setter Property="HasDropShadow" Value="False"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type ToolTip}">
+                    <Border Background="{DynamicResource PopupBackgroundBrush}"
+                            BorderBrush="{DynamicResource PopupBorderBrush}"
+                            BorderThickness="1"
+                            CornerRadius="6"
+                            Padding="9,6"
+                            SnapsToDevicePixels="True">
+                        <Border.Effect>
+                            <DropShadowEffect BlurRadius="10" ShadowDepth="1" Direction="270" Opacity="0.16"/>
+                        </Border.Effect>
+                        <ContentPresenter/>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
     <ResourceDictionary.MergedDictionaries>
         <ResourceDictionary Source="/guage;component/Themes/Window/HideWindow.xaml" />
         <ResourceDictionary Source="/guage;component/Themes/Window/DefaultWindow.xaml" />
