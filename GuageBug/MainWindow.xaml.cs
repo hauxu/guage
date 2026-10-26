@@ -65,7 +65,7 @@ namespace GuageBug
         }
         private void IssuesHyperlinkClick(object sender, RoutedEventArgs e)
         {
-            Process.Start(new ProcessStartInfo("https://github.com/Planshit/guage/issues/new"));
+            Process.Start(new ProcessStartInfo("https://github.com/YOUR_GITHUB/guage/issues/new"));
         }
         private void EmailHyperlinkClick(object sender, RoutedEventArgs e)
         {
@@ -83,7 +83,7 @@ namespace GuageBug
             else
             {
                 MessageBox.Show("guage.exe 似乎已被删除", "重启失败提示", MessageBoxButton.OK, MessageBoxImage.Error);
-                Process.Start(new ProcessStartInfo("https://github.com/Planshit/guage"));
+                Process.Start(new ProcessStartInfo("https://github.com/YOUR_GITHUB/guage"));
             }
             Close();
         }

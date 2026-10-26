@@ -99,8 +99,6 @@
 
             <StackPanel Visibility="{Binding IsDataTabVisible}">
                 <TextBlock Text="数据管理" Style="{StaticResource SettingsSectionTitle}"/>
-                <TextBlock Margin="0,6,0,16" Style="{StaticResource SettingsHint}"
-                           Text="按月份删除或导出使用记录。"/>
 
                 <TextBlock Text="删除数据" Foreground="#f54f4e" FontSize="{DynamicResource AppFontSizeBody}" FontWeight="SemiBold"/>
                 <Border Style="{StaticResource SettingsCard}" Margin="0,10,0,0">
@@ -142,8 +140,6 @@
                                     Icon="SetlockScreen" Content="检查更新"/>
                     </StackPanel>
                     <TextBlock Margin="0,24,0,0" Style="{StaticResource SettingsSectionTitle}" Text="浏览器扩展安装"/>
-                    <TextBlock Margin="0,8,0,0" Style="{StaticResource SettingsHint}"
-                               Text="商店安装，自动更新。"/>
                     <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
                         <Btn:Button Command="{Binding OpenURL}" CommandParameter="{Binding ChromeWebStoreUrl}"
                                     MinWidth="120" Icon="Shop" Content="Chrome 商店"/>
@@ -161,10 +157,10 @@
                                     Margin="12,0,0,0" MinWidth="120" Icon="Help" Content="安装说明"/>
                     </StackPanel>
                     <TextBlock Margin="0,12,0,0" FontSize="{DynamicResource AppFontSizeSecondary}">
-                        <Run Text="开源 "/><Hyperlink Command="{Binding OpenURL}" CommandParameter="https://github.com/Planshit/guage">https://github.com/Planshit/guage</Hyperlink>
+                        <Run Text="开源 "/><Hyperlink Command="{Binding OpenURL}" CommandParameter="https://github.com/YOUR_GITHUB/guage">https://github.com/YOUR_GITHUB/guage</Hyperlink>
                     </TextBlock>
                     <TextBlock Margin="0,8,0,0" FontSize="{DynamicResource AppFontSizeSecondary}">
-                        <Run Text="讨论 "/><Hyperlink Command="{Binding OpenURL}" CommandParameter="https://github.com/Planshit/guage/discussions">https://github.com/Planshit/guage/discussions</Hyperlink>
+                        <Run Text="讨论 "/><Hyperlink Command="{Binding OpenURL}" CommandParameter="https://github.com/YOUR_GITHUB/guage/discussions">https://github.com/YOUR_GITHUB/guage/discussions</Hyperlink>
                     </TextBlock>
                 </StackPanel>
             </Border>

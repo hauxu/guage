@@ -15,6 +15,6 @@ namespace Core.Librarys.Browser
         public const string EdgeAddOnsUrl = "https://microsoftedge.microsoft.com/addons/search/guage%20Sentry";
 
         /// <summary>安装说明（ZIP / 本地载入等）。</summary>
-        public const string InstallGuideUrl = "https://github.com/Planshit/guage/discussions/279";
+        public const string InstallGuideUrl = "https://github.com/YOUR_GITHUB/guage";
     }
 }

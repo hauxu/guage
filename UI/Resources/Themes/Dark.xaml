@@ -23,7 +23,7 @@
     <!--窗口边框颜色-->
     <SolidColorBrush x:Key="WindowBorderBrush" Color="#323232" />
     <!-- 描边也参与毛玻璃着色：不然透明度一调，内框在变、窗外框不动，看着像两层对不齐 -->
-    <SolidColorBrush x:Key="WindowBorderBrushAcrylic" Color="#454545" />
+    <SolidColorBrush x:Key="WindowBorderBrushAcrylic" Color="#5E5E5E" />
     
     <SolidColorBrush x:Key="StandardTextBrush" Color="#ffffff" />
     <!--文字整体提亮，用于在通透背景上维持对比度-->
@@ -75,7 +75,7 @@
     <Color x:Key="SettingPanelBorderColor">#232323</Color>
     <SolidColorBrush x:Key="SettingPanelBorderBrush" Color="{StaticResource SettingPanelBorderColor}" />
     <!-- 框线类笔刷也要有毛玻璃档位：否则卡片底色跟着滑块变淡，边框和分割线却纹丝不动 -->
-    <SolidColorBrush x:Key="SettingPanelBorderBrushAcrylic" Color="#3A3A3A" />
+    <SolidColorBrush x:Key="SettingPanelBorderBrushAcrylic" Color="#5C5C5C" />
     <Color x:Key="SettingPanelSpliteLineColor">#706f6f</Color>
     <SolidColorBrush x:Key="SettingPanelSpliteLineBrush" Color="{StaticResource SettingPanelSpliteLineColor}" />
     <SolidColorBrush x:Key="SettingPanelSpliteLineBrushAcrylic" Color="#4A4A4A" />

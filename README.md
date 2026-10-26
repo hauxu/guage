@@ -63,4 +63,4 @@ Tests\Guage.Tests\bin\Debug\Guage.Tests.exe
 
 ## 许可
 
-见 LICENSE。统计内核源自 [Planshit/Tai](https://github.com/Planshit/Tai)，感谢原作者。
+见 LICENSE。

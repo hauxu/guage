@@ -124,7 +124,7 @@
                     </Border>
                 </StackPanel>
                 <TextBlock Margin="0,6,0,0" Style="{StaticResource PageHint}"
-                           Text="工作、休息循环计时。表盘选分钟，超过 1 小时用小时步进。"/>
+                           Text="表盘选分钟，超过 1 小时用小时步进。"/>
             </StackPanel>
 
             <!-- 工作时长 / 休息时长 卡片 -->
@@ -225,7 +225,7 @@
                         <TextBlock Text="{Binding ModeText}" Style="{StaticResource PageHint}"
                                    FontSize="{DynamicResource AppFontSizeBody}" LineHeight="26"/>
                         <TextBlock Margin="0,10,0,0" Style="{StaticResource PageHint}"
-                                   Text="改设置会停止计时；休眠期间按真实时间继续。" />
+                                   Text="改设置会停止计时。" />
                     </StackPanel>
 
                     <!-- 操作按钮 -->

@@ -12,7 +12,7 @@ using System.Windows;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("Updater")]
-[assembly: AssemblyCopyright("Copyright ©  2021")]
+[assembly: AssemblyCopyright("Copyright © 2026 YOUR_NAME")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

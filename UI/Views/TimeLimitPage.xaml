@@ -172,8 +172,6 @@
             </Grid.ColumnDefinitions>
             <StackPanel>
                 <TextBlock Text="时长限制" FontSize="{DynamicResource AppFontSizeTitle}" FontWeight="SemiBold"/>
-                <TextBlock Margin="0,6,0,0" Foreground="{DynamicResource SubTextBrush}" TextWrapping="Wrap"
-                           Text="按前台使用时长计算，到上限后提醒或执行限制。"/>
             </StackPanel>
             <Border Grid.Column="1" Width="52" Height="52" CornerRadius="12" VerticalAlignment="Top" Opacity="0.9">
                 <Border.Background>
@@ -201,8 +199,6 @@
                         </StackPanel>
                     </Border>
                     <TextBlock Text="启用时长限制" FontSize="{DynamicResource AppFontSizeBody}" FontWeight="SemiBold"/>
-                    <TextBlock Margin="0,6,0,0" Foreground="{DynamicResource SubTextBrush}" TextWrapping="Wrap"
-                               Text="关闭后规则保留但不生效。"/>
                 </StackPanel>
                 <toggle:Toggle Grid.Column="1" VerticalAlignment="Center" IsChecked="{Binding IsEnabled, Mode=TwoWay}"/>
             </Grid>
@@ -228,8 +224,6 @@
                     <base:Icon IconType="MobQuietHours" FontSize="32" Foreground="{DynamicResource ThemeBrush}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                 </Border>
                 <TextBlock Text="还没有限制规则" FontSize="{DynamicResource AppFontSizeBody}" FontWeight="SemiBold" HorizontalAlignment="Center" Margin="0,16,0,0"/>
-                <TextBlock Foreground="{DynamicResource SubTextBrush}" HorizontalAlignment="Center" Margin="0,8,0,0"
-                           Text="扫描本机应用，或手动选择 exe。"/>
             </StackPanel>
 
             <Grid x:Name="RulesScrollHost" Visibility="{Binding RulesVisibility}">
