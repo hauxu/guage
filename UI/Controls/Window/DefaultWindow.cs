@@ -354,10 +354,6 @@ namespace UI.Controls.Window
                 this, configuredCornerStyle, WindowState != WindowState.Maximized);
         }
 
-        private double _lastClipWidth = -1;
-        private double _lastClipHeight = -1;
-        private int _lastClipRadius = -1;
-
         private void OnBackCommand(object sender, ExecutedRoutedEventArgs e)
         {
             if (PageContainer != null)

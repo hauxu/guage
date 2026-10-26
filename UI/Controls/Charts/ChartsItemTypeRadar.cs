@@ -314,7 +314,8 @@ namespace UI.Controls.Charts
                 new Typeface(textBlock.FontFamily, textBlock.FontStyle, textBlock.FontWeight, textBlock.FontStretch),
                 textBlock.FontSize,
                 Brushes.Black,
-                new NumberSubstitution());
+                new NumberSubstitution(),
+                VisualTreeHelper.GetDpi(this).PixelsPerDip);
 
             return new Size(formattedText.Width, formattedText.Height);
         }

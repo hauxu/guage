@@ -150,7 +150,7 @@ namespace UI.Controls.Navigation
                 typeof(NavigationItem), new PropertyMetadata(false));
 
         public delegate void NavigationEventHandler(object sender, MouseButtonEventArgs e);
-        public event NavigationEventHandler MouseUp;
+        public event NavigationEventHandler NavigationMouseUp;
         public NavigationItem()
         {
             DefaultStyleKey = typeof(NavigationItem);
@@ -171,7 +171,7 @@ namespace UI.Controls.Navigation
             {
                 VisualStateManager.GoToState(this, IsMouseOver ? "MouseOver" : "Normal", true);
             }
-            MouseUp?.Invoke(this, e);
+            NavigationMouseUp?.Invoke(this, e);
             if (e.ChangedButton == MouseButton.Left)
             {
                 Command?.Execute(CommandParameter);

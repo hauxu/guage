@@ -367,10 +367,10 @@ namespace UI.Controls.Navigation
 
                 if (!string.IsNullOrEmpty(item.Title))
                 {
-                    navItem.MouseUp += NavItem_MouseUp;
+                    navItem.NavigationMouseUp += NavItem_MouseUp;
                     navItem.Unloaded += (e, c) =>
                     {
-                        navItem.MouseUp -= NavItem_MouseUp;
+                        navItem.NavigationMouseUp -= NavItem_MouseUp;
                     };
                 }
                 ItemsPanel.Children.Add(navItem);

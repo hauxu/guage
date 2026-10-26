@@ -22,7 +22,11 @@ namespace UI.Controls
         {
             return true;
         }
-        public event EventHandler CanExecuteChanged;
+        public event EventHandler CanExecuteChanged
+        {
+            add { System.Windows.Input.CommandManager.RequerySuggested += value; }
+            remove { System.Windows.Input.CommandManager.RequerySuggested -= value; }
+        }
         public void Execute(object parameter)
         {
             _action(parameter);

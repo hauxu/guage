@@ -22,6 +22,8 @@
     <!--【窗口】-->
     <!--窗口边框颜色-->
     <SolidColorBrush x:Key="WindowBorderBrush" Color="#323232" />
+    <!-- 描边也参与毛玻璃着色：不然透明度一调，内框在变、窗外框不动，看着像两层对不齐 -->
+    <SolidColorBrush x:Key="WindowBorderBrushAcrylic" Color="#454545" />
     
     <SolidColorBrush x:Key="StandardTextBrush" Color="#ffffff" />
     <!--文字整体提亮，用于在通透背景上维持对比度-->

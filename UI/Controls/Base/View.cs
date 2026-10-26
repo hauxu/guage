@@ -146,7 +146,7 @@ namespace UI.Controls.Base
                     Visibility = Visibility.Collapsed;
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 Visibility = Visibility.Collapsed;
             }

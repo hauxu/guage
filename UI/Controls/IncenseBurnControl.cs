@@ -93,8 +93,7 @@ namespace UI.Controls
         private Rectangle _stickBody;
         private Rectangle _stickHighlight;
         private Rectangle _bambooFoot;
-        private Rectangle _ashCap;
-        private Rectangle _charBand;
+                private Rectangle _charBand;
         private Ellipse _emberGlow;
         private Ellipse _ember;
         private Ellipse _emberCore;
@@ -102,7 +101,17 @@ namespace UI.Controls
         private Path _smokeMain;
         private Path _smokeHalo;
         private PathGeometry _smokeGeometry;
+        private PathFigure _smokeMainFigure;
         private PointCollection _smokePoints;
+        private readonly List<Path> _smokeAux = new List<Path>();
+        private readonly List<PointCollection> _smokeAuxPoints = new List<PointCollection>();
+        private readonly List<PathFigure> _smokeAuxFigures = new List<PathFigure>();
+        private Ellipse _holderShadow;
+        private Ellipse _holderGloss;
+        private Path _smokeRibbon;
+        private PathFigure _ribbonFigure;
+        private PointCollection _ribbonLeft;
+        private PointCollection _ribbonRight;
         private bool _incenseBuilt;
 
         // ---- 帧循环状态 ----
@@ -146,6 +155,17 @@ namespace UI.Controls
             }
             _incenseBuilt = true;
 
+            //  香座投影：没有接触阴影的圆角块看起来像贴纸
+            _holderShadow = new Ellipse
+            {
+                Width = 88,
+                Height = 11,
+                IsHitTestVisible = false,
+                Fill = Radial(Color.FromArgb(0x50, 0x00, 0x00, 0x00), Color.FromArgb(0x00, 0x00, 0x00, 0x00), 0x50, 0x00, freeze: false)
+            };
+            SetRect(_holderShadow, X - 44, BaseY - 1);
+            Children.Add(_holderShadow);
+
             //  香座：托碟 + 托柱（黄铜色）
             _holderStem = new Rectangle
             {
@@ -172,6 +192,16 @@ namespace UI.Controls
             };
             SetRect(_holderDish, X - 39, BaseY - 12);
             Children.Add(_holderDish);
+
+            _holderGloss = new Ellipse
+            {
+                Width = 60,
+                Height = 4.5,
+                IsHitTestVisible = false,
+                Fill = new SolidColorBrush(Color.FromArgb(0x34, 0xFF, 0xF6, 0xE2))
+            };
+            SetRect(_holderGloss, X - 30, BaseY - 10.5);
+            Children.Add(_holderGloss);
 
             //  底部竹芯：香底露出的浅黄签芯段
             _bambooFoot = new Rectangle
@@ -259,32 +289,86 @@ namespace UI.Controls
             }
 
             //  燃点三件套：外围光晕 + 红光 + 白热内核（不冻结，随阶段换色）
+            //  燃点贴着香体宽度，竖向略长；做大成圆球就成了糖葫芦
             _emberGlow = new Ellipse
             {
-                Width = 30,
-                Height = 30,
+                Width = 22,
+                Height = 28,
                 IsHitTestVisible = false
             };
-            _emberGlow.Fill = Radial(Colors.White, Color.FromRgb(0xFF, 0x7A, 0x1E), 0x70, 0x00, freeze: false);
+            _emberGlow.Fill = Radial(Colors.White, Color.FromRgb(0xFF, 0x7A, 0x1E), 0x58, 0x00, freeze: false);
             Children.Add(_emberGlow);
 
             _ember = new Ellipse
             {
-                Width = 12,
-                Height = 12,
+                Width = 7.5,
+                Height = 9.5,
                 IsHitTestVisible = false
             };
-            _ember.Fill = Radial(Color.FromRgb(0xFF, 0xD9, 0x8A), Color.FromRgb(0xE2, 0x3B, 0x0E), 0xF0, 0x20, freeze: false);
+            _ember.Fill = Radial(Color.FromRgb(0xFF, 0xD9, 0x8A), Color.FromRgb(0xC8, 0x2C, 0x08), 0xF0, 0x28, freeze: false);
             Children.Add(_ember);
 
             _emberCore = new Ellipse
             {
-                Width = 5,
-                Height = 5,
+                Width = 3,
+                Height = 3.6,
                 IsHitTestVisible = false
             };
-            _emberCore.Fill = Radial(Colors.White, Color.FromRgb(0xFF, 0xE9, 0xB0), 0xFF, 0x40);
+            _emberCore.Fill = Radial(Colors.White, Color.FromRgb(0xFF, 0xE0, 0x9A), 0xFF, 0x50);
             Children.Add(_emberCore);
+
+            //  烟带：从燃点上方向上升腾、逐渐变宽变淡的填充体。
+            //  只靠细描边永远像一根线，有这层才有"烟"的体积
+            const int ribbonPts = 16;
+            _ribbonLeft = new PointCollection(ribbonPts);
+            _ribbonRight = new PointCollection(ribbonPts);
+            for (int i = 0; i < ribbonPts; i++)
+            {
+                _ribbonLeft.Add(new Point(X, BaseY - MaxLen));
+                _ribbonRight.Add(new Point(X, BaseY - MaxLen));
+            }
+
+            var ribbonGeo = new PathGeometry();
+            var ribbonFigure = new PathFigure
+            {
+                StartPoint = _ribbonLeft[0],
+                IsFilled = true,
+                IsClosed = true
+            };
+            //  必须用属性赋值共享同一个点集：PolyLineSegment(IEnumerable) 这个重载会拷贝，
+            //  拷贝之后每帧写点集根本不会进渲染（烟会永远停在建图时那条直线）
+            var ribbonLeftSeg = new System.Windows.Media.PolyLineSegment();
+            ribbonLeftSeg.Points = _ribbonLeft;
+            var ribbonRightSeg = new System.Windows.Media.PolyLineSegment();
+            ribbonRightSeg.Points = _ribbonRight;
+            ribbonFigure.Segments.Add(ribbonLeftSeg);
+            ribbonFigure.Segments.Add(ribbonRightSeg);
+            ribbonGeo.Figures.Add(ribbonFigure);
+            _ribbonFigure = ribbonFigure;
+
+            //  三档而不是两档：两档线性会让烟在中段就淡没了
+            var ribbonFill = new LinearGradientBrush
+            {
+                StartPoint = new Point(0.5, 1),
+                EndPoint = new Point(0.5, 0),
+                GradientStops =
+                {
+                    new GradientStop(Color.FromArgb(0x52, 0xE2, 0xE7, 0xEC), 0.0),
+                    new GradientStop(Color.FromArgb(0x46, 0xE2, 0xE7, 0xEC), 0.35),
+                    new GradientStop(Color.FromArgb(0x2A, 0xE2, 0xE7, 0xEC), 0.7),
+                    new GradientStop(Color.FromArgb(0x0C, 0xE2, 0xE7, 0xEC), 1.0)
+                }
+            };
+            ribbonFill.Freeze();
+            _smokeRibbon = new Path
+            {
+                Data = ribbonGeo,
+                Fill = ribbonFill,
+                IsHitTestVisible = false,
+                Visibility = Visibility.Collapsed
+            };
+            Children.Add(_smokeRibbon);
+            Canvas.SetZIndex(_smokeRibbon, 0);
 
             //  青烟细丝：主丝 1.8px + 扩散晕 5px（共享点集）
             const int smokePts = 14;
@@ -300,13 +384,23 @@ namespace UI.Controls
                 IsFilled = false,
                 IsClosed = false
             };
-            smokeFigure.Segments.Add(new System.Windows.Media.PolyLineSegment(_smokePoints, true));
+            var smokeSeg = new System.Windows.Media.PolyLineSegment();
+            smokeSeg.Points = _smokePoints;
+            smokeFigure.Segments.Add(smokeSeg);
             _smokeGeometry.Figures.Add(smokeFigure);
 
-            var mainStroke = new LinearGradientBrush(
-                Color.FromArgb(0xC0, 0xC9, 0xCE, 0xD4),
-                Color.FromArgb(0x00, 0xC9, 0xCE, 0xD4),
-                new Point(0.5, 1), new Point(0.5, 0));
+            var mainStroke = new LinearGradientBrush
+            {
+                StartPoint = new Point(0.5, 1),
+                EndPoint = new Point(0.5, 0),
+                GradientStops =
+                {
+                    new GradientStop(Color.FromArgb(0x8C, 0xC9, 0xCE, 0xD4), 0.0),
+                    new GradientStop(Color.FromArgb(0x58, 0xC9, 0xCE, 0xD4), 0.4),
+                    new GradientStop(Color.FromArgb(0x1C, 0xC9, 0xCE, 0xD4), 0.8),
+                    new GradientStop(Color.FromArgb(0x00, 0xC9, 0xCE, 0xD4), 1.0)
+                }
+            };
             mainStroke.Freeze();
             _smokeMain = new Path
             {
@@ -321,7 +415,7 @@ namespace UI.Controls
             Children.Add(_smokeMain);
 
             var haloStroke = new LinearGradientBrush(
-                Color.FromArgb(0x30, 0xC9, 0xCE, 0xD4),
+                Color.FromArgb(0x1E, 0xC9, 0xCE, 0xD4),
                 Color.FromArgb(0x00, 0xC9, 0xCE, 0xD4),
                 new Point(0.5, 1), new Point(0.5, 0));
             haloStroke.Freeze();
@@ -338,6 +432,49 @@ namespace UI.Controls
             Children.Add(_smokeHalo);
             Canvas.SetZIndex(_smokeHalo, 1);
             Canvas.SetZIndex(_smokeMain, 2);   // 主烟丝压在扩散晕之上
+            _smokeMainFigure = smokeFigure;
+
+            //  单丝永远像一根线，两缕错相位错粗细才有"烟"的体积
+            for (int s = 0; s < 2; s++)
+            {
+                var pts = new PointCollection(smokePts);
+                for (int i = 0; i < smokePts; i++)
+                {
+                    pts.Add(new Point(X, BaseY - MaxLen));
+                }
+                var geo = new PathGeometry();
+                var fig = new PathFigure
+                {
+                    StartPoint = new Point(X, BaseY - MaxLen),
+                    IsFilled = false,
+                    IsClosed = false
+                };
+                var auxSeg = new System.Windows.Media.PolyLineSegment();
+                auxSeg.Points = pts;
+                fig.Segments.Add(auxSeg);
+                geo.Figures.Add(fig);
+
+                var stroke = new LinearGradientBrush(
+                    Color.FromArgb(s == 0 ? (byte)0x40 : (byte)0x30, 0xC9, 0xCE, 0xD4),
+                    Color.FromArgb(0x00, 0xC9, 0xCE, 0xD4),
+                    new Point(0.5, 1), new Point(0.5, 0));
+                stroke.Freeze();
+                var path = new Path
+                {
+                    Data = geo,
+                    Stroke = stroke,
+                    StrokeThickness = s == 0 ? 1.1 : 2.4,
+                    StrokeStartLineCap = PenLineCap.Round,
+                    StrokeEndLineCap = PenLineCap.Round,
+                    IsHitTestVisible = false,
+                    Visibility = Visibility.Collapsed
+                };
+                _smokeAuxPoints.Add(pts);
+                _smokeAuxFigures.Add(fig);
+                _smokeAux.Add(path);
+                Children.Add(path);
+                Canvas.SetZIndex(path, 2);
+            }
 
             _ashHangLen = 0;
             _ashTrim = 0;
@@ -420,28 +557,29 @@ namespace UI.Controls
             _charBand.Height = Math.Min(15, 9 + 6 * (1 - progress));
             SetRect(_charBand, X - (StickW + 0.8) / 2, top - 4);
 
-            //  香灰段悬挂：从燃点向上堆叠；灰总长随已燃比例增长（上限 46），扣除断落削减
-            _ashHangLen = Math.Max(0, Math.Min(46, (1 - progress) * 60) - _ashTrim);
-            double cursor = top - 2;
+            //  香灰只在燃点上方留一小撮：真实香不会在头顶堆出几十像素的灰柱
+            const int ashCapSegs = 2;
+            _ashHangLen = Math.Max(0, Math.Min(9, (1 - progress) * 14) - _ashTrim);
+            double ashSeg = _ashHangLen / ashCapSegs;
+            double cursor = top - 1.2;
             for (int i = 0; i < _ashRings.Count; i++)
             {
                 var seg = _ashRings[i];
-                double segLen = _ashHangLen / _ashRings.Count;
-                if (cursor - segLen < top - _ashHangLen || cursor <= top)
+                if (i >= ashCapSegs || ashSeg <= 0.15)
                 {
                     seg.Visibility = Visibility.Collapsed;
                     continue;
                 }
                 seg.Visibility = Visibility.Visible;
-                seg.Height = segLen;
-                SetRect(seg, X - seg.Width / 2 + (i % 2 == 0 ? -0.6 : 0.6), cursor - segLen);
-                cursor -= segLen;
+                seg.Height = ashSeg;
+                SetRect(seg, X - seg.Width / 2 + (i % 2 == 0 ? -0.4 : 0.4), cursor - ashSeg);
+                cursor -= ashSeg;
             }
 
-            //  燃点三件套
-            SetRect(_emberGlow, X - 15, top - 15);
-            SetRect(_ember, X - 6, top - 6.5);
-            SetRect(_emberCore, X - 2.5, top - 5);
+            //  燃点三件套（尺寸见 BuildIncense）
+            SetRect(_emberGlow, X - 11, top - 15);
+            SetRect(_ember, X - 3.75, top - 4.2);
+            SetRect(_emberCore, X - 1.5, top - 3.2);
 
             //  青烟几何原点跟随燃点（点集由帧循环写入）
             if (_smokePoints != null)
@@ -512,6 +650,14 @@ namespace UI.Controls
             var v = visible ? Visibility.Visible : Visibility.Collapsed;
             _smokeMain.Visibility = v;
             _smokeHalo.Visibility = v;
+            foreach (var aux in _smokeAux)
+            {
+                aux.Visibility = v;
+            }
+            if (_smokeRibbon != null)
+            {
+                _smokeRibbon.Visibility = v;
+            }
         }
 
         private void OnFrameRendering(object sender, EventArgs e)
@@ -594,14 +740,65 @@ namespace UI.Controls
             for (int i = 0; i < _smokePoints.Count; i++)
             {
                 double f = i / (double)(_smokePoints.Count - 1);
-                double rise = f * 150;
-                double amp = Math.Pow(f, 1.5) * 20 * lull * (1 + 0.8 * _flareBoost);
-                double wind = Math.Sin(now * 0.35 + 0.8) * 6 * lull;
+                double rise = f * 185;
+                double amp = Math.Pow(f, 1.45) * 26 * lull * (1 + 0.8 * _flareBoost);
+                double wind = Math.Sin(now * 0.35 + 0.8) * 14 * lull * f;
                 double wave = Math.Sin(f * 5.2 - now * 2.0 + 1.7)
                     + 0.45 * Math.Sin(f * 8.6 - now * 3.3 + 0.6);
                 double x = X + wind + wave * amp;
                 double y = tipTop - 8 - rise;
                 _smokePoints[i] = new Point(x, y);
+            }
+
+            //  PathFigure 的起点要跟着点集走，否则会从旧起点拉一条直线回来
+            if (_smokeMainFigure != null && _smokePoints.Count > 0)
+            {
+                _smokeMainFigure.StartPoint = _smokePoints[0];
+            }
+
+            //  烟带顶点：中心线沿用主丝走势，宽度随高度指数变宽（烟会扩散）
+            if (_ribbonLeft != null && _smokePoints.Count > 1)
+            {
+                int n = _ribbonLeft.Count;
+                for (int i = 0; i < n; i++)
+                {
+                    double f = i / (double)(n - 1);
+                    int srcIndex = (int)Math.Round(f * (_smokePoints.Count - 1));
+                    var c = _smokePoints[srcIndex];
+                    double halfW = 2.0 + 17.0 * Math.Pow(f, 1.15) * (0.85 + 0.3 * Math.Sin(now * 0.7 + f * 4.0));
+                    //  顶端收尖：不然烟会以一条平口结束，像被剪断
+                    if (f > 0.84)
+                    {
+                        halfW *= Math.Max(0.06, (1 - f) / 0.16);
+                    }
+                    _ribbonLeft[i] = new Point(c.X - halfW, c.Y);
+                    //  逆序填：几何封闭时从右缘自顶向下回到底部
+                    _ribbonRight[n - 1 - i] = new Point(c.X + halfW, c.Y);
+                }
+
+                //  起点必须跟着走，否则多边形会从建图时的旧点拉出一条斜边，整块被拉细
+                _ribbonFigure.StartPoint = _ribbonLeft[0];
+            }
+
+            for (int s = 0; s < _smokeAuxPoints.Count; s++)
+            {
+                var pts = _smokeAuxPoints[s];
+                double phase = s == 0 ? 1.9 : 3.4;
+                double drift = s == 0 ? 1.15 : 0.82;
+                for (int i = 0; i < pts.Count; i++)
+                {
+                    double f = i / (double)(pts.Count - 1);
+                    double rise = f * (168 + s * 22);
+                    double amp = Math.Pow(f, 1.6) * (18 + s * 6) * lull * (1 + 0.8 * _flareBoost);
+                    double wind = Math.Sin(now * 0.31 * drift + phase) * (5 + s * 2) * lull;
+                    double wave = Math.Sin(f * 4.6 * drift - now * (1.7 + 0.4 * s) + phase)
+                        + 0.4 * Math.Sin(f * 8.0 - now * 3.0 + 0.6);
+                    pts[i] = new Point(X + wind + wave * amp, tipTop - 7 - rise);
+                }
+                if (_smokeAuxFigures[s].StartPoint != pts[0])
+                {
+                    _smokeAuxFigures[s].StartPoint = pts[0];
+                }
             }
         }
 

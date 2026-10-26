@@ -64,7 +64,6 @@ namespace Core.Servicers.Instances
 
         //  钩子回调(UI 线程)与 1 秒轮询(线程池)会同时访问，必须是并发字典
         private System.Collections.Concurrent.ConcurrentDictionary<string, AppInfo> _apps;
-        private int _outTime = 5000;
         //private string _windowsVersionName;
         public AppManager()
         {

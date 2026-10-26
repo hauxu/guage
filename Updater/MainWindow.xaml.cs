@@ -128,7 +128,7 @@ namespace Updater
                     httpWebResponse.Close();
                     return true;
                 }
-                catch (Exception ec)
+                catch (Exception)
                 {
                     //  失败时删除半截文件，避免残包参与后续校验
                     try

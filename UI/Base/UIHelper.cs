@@ -26,7 +26,8 @@ namespace UI.Base
                 new Typeface(textBlock.FontFamily, textBlock.FontStyle, textBlock.FontWeight, textBlock.FontStretch),
                 textBlock.FontSize,
                 Brushes.Black,
-                new NumberSubstitution());
+                new NumberSubstitution(),
+                VisualTreeHelper.GetDpi(textBlock).PixelsPerDip);
 
             return new Size(formattedText.Width, formattedText.Height);
         }

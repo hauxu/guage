@@ -53,7 +53,6 @@ namespace UI.Controls.Charts
 
         #endregion
         private double _lastAngle = -Math.PI / 2;
-        private int _zIndex = 1;
         private List<Path> _paths = new List<Path>();
         public ChartsItemTypePie()
         {
@@ -128,7 +127,6 @@ namespace UI.Controls.Charts
                 }
             }
         }
-        private double _lastX = -1, _lastY = -1;
         private Path CreatePath(double angle_, SolidColorBrush color_)
         {
             Path path = new Path();

@@ -26,7 +26,7 @@ namespace Core.Servicers.Instances
 
                 return new WindowInfo(className, title, handle_, width, height, x, y);
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 return WindowInfo.Empty;
             }
@@ -48,7 +48,7 @@ namespace Core.Servicers.Instances
                 string title = stringBuilder.ToString();
                 return stringBuilder.ToString();
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 return string.Empty;
             }

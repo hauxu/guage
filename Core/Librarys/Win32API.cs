@@ -288,7 +288,7 @@ namespace Core.Librarys
                 return rect;
 
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 return new RECT()
                 {
@@ -314,7 +314,7 @@ namespace Core.Librarys
 
                 return stringBuilder.ToString();
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 return string.Empty;
             }

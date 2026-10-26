@@ -183,6 +183,11 @@ public void ApplyAppearancePreview(bool committed = true)
         /// 透明度 0 时各层完全不透明，等同于纯色亚克力；100 时完全透明，只剩模糊。
         /// 各层叠加的层数不同，因此越靠内的表面实际越实，正文区域的可读性由此保证。
         /// </summary>
+        /// <summary>
+        /// 窗口描边在毛玻璃下的最低不透明度。
+        /// </summary>
+        private const byte BorderMinAlpha = 78;
+
         private void UpdateBackdrop(bool committed = true)
         {
             var resources = Application.Current.Resources;
@@ -213,7 +218,14 @@ public void ApplyAppearancePreview(bool committed = true)
                     SolidColorBrush target = null;
                     if (isGlass)
                     {
-                        target = CreateTintBrush(themeDict[key] as SolidColorBrush, alpha);
+                        byte keyAlpha = alpha;
+                        if (targetKey == "WindowBorderBrush")
+                        {
+                            //  窗口描边只有 1px，跟着内容一起淡到 16/255 会整条消失，
+                            //  看起来就像窗口没有边。给它留一个下限，滑块到底也还在
+                            keyAlpha = Math.Max(alpha, BorderMinAlpha);
+                        }
+                        target = CreateTintBrush(themeDict[key] as SolidColorBrush, keyAlpha);
                     }
 
                     //  同值跳过：拖动中只刷笔刷时避免全树 DynamicResource 无谓失效
