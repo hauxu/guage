@@ -10,9 +10,9 @@ using System.Windows;
 [assembly: AssemblyTitle("guage")]
 [assembly: AssemblyDescription("更矩")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("YOUR_NAME")]
+[assembly: AssemblyCompany("hauxu")]
 [assembly: AssemblyProduct("guage")]
-[assembly: AssemblyCopyright("Copyright © 2026 YOUR_NAME")]
+[assembly: AssemblyCopyright("Copyright © 2026 hauxu")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

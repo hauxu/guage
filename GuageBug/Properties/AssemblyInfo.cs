@@ -12,7 +12,7 @@ using System.Windows;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("GuageBug")]
-[assembly: AssemblyCopyright("Copyright © 2026 YOUR_NAME")]
+[assembly: AssemblyCopyright("Copyright © 2026 hauxu")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
