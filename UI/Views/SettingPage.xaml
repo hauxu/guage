@@ -74,8 +74,6 @@
 
         <StackPanel Grid.ColumnSpan="3" Margin="0,0,0,24">
             <TextBlock Text="设置" FontSize="{DynamicResource AppFontSizeDisplay}" FontWeight="SemiBold"/>
-            <TextBlock Margin="0,6,0,0" Style="{StaticResource SettingsHint}"
-                       Text="调整外观、行为与数据管理。时长限制已移至左侧导航栏。"/>
         </StackPanel>
 
         <Border Grid.Row="1" Grid.Column="0" Style="{StaticResource SettingsCard}" Padding="10">
@@ -102,7 +100,7 @@
             <StackPanel Visibility="{Binding IsDataTabVisible}">
                 <TextBlock Text="数据管理" Style="{StaticResource SettingsSectionTitle}"/>
                 <TextBlock Margin="0,6,0,16" Style="{StaticResource SettingsHint}"
-                           Text="删除或导出指定月份范围内的使用记录，操作请谨慎。"/>
+                           Text="按月份删除或导出使用记录。"/>
 
                 <TextBlock Text="删除数据" Foreground="#f54f4e" FontSize="{DynamicResource AppFontSizeBody}" FontWeight="SemiBold"/>
                 <Border Style="{StaticResource SettingsCard}" Margin="0,10,0,0">
@@ -120,7 +118,7 @@
                 <TextBlock Text="导出数据" FontSize="{DynamicResource AppFontSizeBody}" FontWeight="SemiBold" Margin="0,20,0,0"/>
                 <Border Style="{StaticResource SettingsCard}" Margin="0,10,0,0">
                     <StackPanel>
-                        <TextBlock Style="{StaticResource SettingsHint}" Text="导出为 xlsx 和 csv 格式。"/>
+                        <TextBlock Style="{StaticResource SettingsHint}" Text="xlsx / csv"/>
                         <StackPanel Orientation="Horizontal" Margin="0,14,0,0">
                             <TextBlock Text="从" VerticalAlignment="Center"/>
                             <select:DateSelect Date="{Binding ExportDataStartMonthDate, Mode=TwoWay}" Margin="10,0" SelectType="Month"/>
@@ -145,7 +143,7 @@
                     </StackPanel>
                     <TextBlock Margin="0,24,0,0" Style="{StaticResource SettingsSectionTitle}" Text="浏览器扩展安装"/>
                     <TextBlock Margin="0,8,0,0" Style="{StaticResource SettingsHint}"
-                               Text="方式一（推荐）：在 Chrome / Edge 扩展商店搜索「guage Sentry」并安装，由商店自动更新。"/>
+                               Text="商店安装，自动更新。"/>
                     <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
                         <Btn:Button Command="{Binding OpenURL}" CommandParameter="{Binding ChromeWebStoreUrl}"
                                     MinWidth="120" Icon="Shop" Content="Chrome 商店"/>
@@ -153,7 +151,7 @@
                                     Margin="12,0,0,0" MinWidth="120" Icon="Globe" Content="Edge 商店"/>
                     </StackPanel>
                     <TextBlock Margin="0,16,0,0" Style="{StaticResource SettingsHint}"
-                               Text="方式二：下载 ZIP 解压，或使用仓库内 Guage.Chrome 文件夹，在浏览器扩展页开启开发者模式后「加载解压缩的扩展」。"/>
+                               Text="或加载仓库内 Guage.Chrome 目录（需开开发者模式）。"/>
                     <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
                         <Btn:Button Command="{Binding OpenBrowserExtensionFolderCommand}"
                                     MinWidth="160"
@@ -168,8 +166,6 @@
                     <TextBlock Margin="0,8,0,0" FontSize="{DynamicResource AppFontSizeSecondary}">
                         <Run Text="讨论 "/><Hyperlink Command="{Binding OpenURL}" CommandParameter="https://github.com/Planshit/guage/discussions">https://github.com/Planshit/guage/discussions</Hyperlink>
                     </TextBlock>
-                    <TextBlock Margin="0,20,0,0" FontSize="{DynamicResource AppFontSizeSecondary}" FontWeight="SemiBold" Text="外部资源声明"/>
-                    <TextBlock Style="{StaticResource SettingsHint}" Margin="0,6,0,0" Text="Icon 来自微软 Emoji"/>
                 </StackPanel>
             </Border>
         </Grid>

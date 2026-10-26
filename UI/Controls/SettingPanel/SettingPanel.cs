@@ -336,7 +336,6 @@ namespace UI.Controls.SettingPanel
             border.Background = Background;
             border.CornerRadius = new CornerRadius(6);
             border.BorderBrush = BorderBrush;
-            //border.BorderBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#ededed"));
             border.BorderThickness = new Thickness(1);
             border.Child = item;
 
@@ -813,7 +812,7 @@ namespace UI.Controls.SettingPanel
             var description = new TextBlock();
             description.Text = configAttribute.Description;
             description.Margin = new Thickness(10, 10, 10, 0);
-            description.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#989CA1"));
+            description.SetResourceReference(TextBlock.ForegroundProperty, "SubTextBrush");
             var container = new StackPanel();
 
             var head = new Grid();

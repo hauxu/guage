@@ -73,8 +73,11 @@
     <SolidColorBrush x:Key="SettingPanelBgBrush" Color="{StaticResource SettingPanelBgColor}" />
     <Color x:Key="SettingPanelBorderColor">#ededed</Color>
     <SolidColorBrush x:Key="SettingPanelBorderBrush" Color="{StaticResource SettingPanelBorderColor}" />
+    <!-- 框线类笔刷也要有毛玻璃档位：否则卡片底色跟着滑块变淡，边框和分割线却纹丝不动 -->
+    <SolidColorBrush x:Key="SettingPanelBorderBrushAcrylic" Color="#DCDCDC" />
     <Color x:Key="SettingPanelSpliteLineColor">#ededed</Color>
     <SolidColorBrush x:Key="SettingPanelSpliteLineBrush" Color="{StaticResource SettingPanelSpliteLineColor}" />
+    <SolidColorBrush x:Key="SettingPanelSpliteLineBrushAcrylic" Color="#DCDCDC" />
 
     <!--白色背景文字颜色-->
     <Color x:Key="WhiteBgTextColor">#2E2E2E</Color>
@@ -113,6 +116,7 @@
     <!--分割线颜色-->
     <Color x:Key="SeparatorColor">#FFECECEC</Color>
     <SolidColorBrush x:Key="SeparatorBrush" Color="{StaticResource SeparatorColor}" />
+    <SolidColorBrush x:Key="SeparatorBrushAcrylic" Color="#DCDCDC" />
 
     <!--上下文菜单-->
     <Color x:Key="ContextBorderColor">#c4c4c4</Color>

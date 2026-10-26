@@ -136,7 +136,6 @@ public void ApplyAppearancePreview(bool committed = true)
             //        {
             //            resourceDictionary[key] = themeDict[key];
             //        }
-            //        //resourceDictionary["ThemeColor"] = (System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString("#ff0000");
             //    }
             //    //}
             //}
@@ -183,10 +182,16 @@ public void ApplyAppearancePreview(bool committed = true)
         /// 透明度 0 时各层完全不透明，等同于纯色亚克力；100 时完全透明，只剩模糊。
         /// 各层叠加的层数不同，因此越靠内的表面实际越实，正文区域的可读性由此保证。
         /// </summary>
-        /// <summary>
-        /// 窗口描边在毛玻璃下的最低不透明度。
-        /// </summary>
-        private const byte BorderMinAlpha = 78;
+        //  1px 框线：这些跟着滑块淡到底会消失，需要单独托底
+        private static readonly HashSet<string> HairlineKeys = new HashSet<string>(StringComparer.Ordinal)
+        {
+            "WindowBorderBrush",
+            "SettingPanelBorderBrush",
+            "SettingPanelSpliteLineBrush",
+            "SeparatorBrush",
+            "PopupBorderBrush",
+            "ContextBorderBrush",
+        };
 
         private void UpdateBackdrop(bool committed = true)
         {
@@ -219,11 +224,12 @@ public void ApplyAppearancePreview(bool committed = true)
                     if (isGlass)
                     {
                         byte keyAlpha = alpha;
-                        if (targetKey == "WindowBorderBrush")
+                        if (HairlineKeys.Contains(targetKey))
                         {
-                            //  窗口描边只有 1px，跟着内容一起淡到 16/255 会整条消失，
-                            //  看起来就像窗口没有边。给它留一个下限，滑块到底也还在
-                            keyAlpha = Math.Max(alpha, BorderMinAlpha);
+                            //  框线只有 1px：跟内容一起淡到底会整条消失（"卡片还在、边框没了"）。
+                            //  但也不能钉死一个固定值，否则滑块到头时只剩一圈线框。
+                            //  取"内容 alpha 的两倍 + 一点底"，随滑块一起走
+                            keyAlpha = (byte)Math.Min(255, Math.Max(alpha, alpha * 2 + 20));
                         }
                         target = CreateTintBrush(themeDict[key] as SolidColorBrush, keyAlpha);
                     }
