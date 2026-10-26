@@ -216,16 +216,8 @@ namespace UI.Controls.Window
 
         private void ApplyBackdrop()
         {
-            if (acrylicEnabled)
-            {
-                //  只上模糊、不上色：DWM 那层按窗口矩形铺，只要带可见颜色就会把圆角填平
-                //  （观感是"上面圆角、下面露出直角"）。颜色交给 ThemeServicer 的 tint 笔刷
-                //  在 WPF 内绘制，于是抗锯齿圆角与外发光阴影都能保住。
-                UI.Base.WindowBackdrop.ApplyBlurOnly(this, acrylicTint);
-                return;
-            }
-
-            UI.Base.WindowBackdrop.Apply(this, false, acrylicTint, acrylicTintAlpha);
+            //  圆角改由 DWM 裁之后，accent 与窗口形状是同一层，可以正常带着色提交
+            UI.Base.WindowBackdrop.Apply(this, acrylicEnabled, acrylicTint, acrylicTintAlpha);
         }
 
         /// <summary>
@@ -338,14 +330,14 @@ namespace UI.Controls.Window
 
         //  窗口圆角（px）。layered 窗口（AllowsTransparency）下圆角由 WPF 渲染，
         //  任意半径平滑抗锯齿——不再受 DWM 直角/4px/8px 三档限制
-        private int configuredCornerRadius = 12;
+        private int configuredCornerStyle = 2;
 
         /// <summary>
-        /// 应用窗口圆角配置。最大化时自动切换为直角。
+        /// 应用窗口圆角档位（0=直角，1=小圆角，2=圆角）。最大化时自动切直角。
         /// </summary>
-        public void ApplyCornerRadius(int radius)
+        public void ApplyCornerStyle(int cornerStyle)
         {
-            configuredCornerRadius = Math.Max(0, Math.Min(24, radius));
+            configuredCornerStyle = Math.Max(0, Math.Min(UI.Base.WindowBackdrop.CornerStyleRound, cornerStyle));
             UpdateRoundedCorners();
         }
 
@@ -356,68 +348,15 @@ namespace UI.Controls.Window
 
         private void UpdateRoundedCorners()
         {
-            int radius = WindowState == WindowState.Maximized ? 0 : configuredCornerRadius;
-
-            if (RootBorder != null)
-            {
-                RootBorder.CornerRadius = new CornerRadius(radius);
-                UpdateRootBorderClip(radius);
-            }
-
-            //  layered 窗口 DWM 圆角偏好无效；恒传 DONOTROUND，
-            //  防止系统 8px 档裁切与更大的 WPF 半径打架
-            UI.Base.WindowBackdrop.SetRoundedCorners(this, 0, WindowState != WindowState.Maximized);
+            //  窗口是非分层的，形状由 DWM 裁：圆角与毛玻璃是同一层，不会再错位。
+            //  WPF 侧不再自己裁，否则角部会露出两条弧线
+            UI.Base.WindowBackdrop.SetRoundedCorners(
+                this, configuredCornerStyle, WindowState != WindowState.Maximized);
         }
 
-        //  上次 Clip 尺寸/半径：未变时跳过重建（缩放时每像素都触发 SizeChanged）
         private double _lastClipWidth = -1;
         private double _lastClipHeight = -1;
         private int _lastClipRadius = -1;
-
-        private void UpdateRootBorderClip(int radius)
-        {
-            if (RootBorder == null || RootBorder.ActualWidth <= 0 || RootBorder.ActualHeight <= 0)
-            {
-                return;
-            }
-
-            if (radius <= 0)
-            {
-                RootBorder.Clip = null;
-                _lastClipWidth = _lastClipHeight = -1;
-                _lastClipRadius = 0;
-                return;
-            }
-
-            //  尺寸与半径都未变才跳过重建（只改半径时必须重建，否则内容裁切滞后）
-            if (Math.Abs(_lastClipWidth - RootBorder.ActualWidth) < 0.5
-                && Math.Abs(_lastClipHeight - RootBorder.ActualHeight) < 0.5
-                && _lastClipRadius == radius
-                && RootBorder.Clip != null)
-            {
-                return;
-            }
-            _lastClipWidth = RootBorder.ActualWidth;
-            _lastClipHeight = RootBorder.ActualHeight;
-            _lastClipRadius = radius;
-
-            // 冻结几何：缩放过程中每步都会重建 Clip，冻结可降低渲染与命中测试开销（缓解缩放卡顿）
-            var geometry = new RectangleGeometry
-            {
-                RadiusX = radius,
-                RadiusY = radius,
-                Rect = new Rect(0, 0, RootBorder.ActualWidth, RootBorder.ActualHeight)
-            };
-            geometry.Freeze();
-            RootBorder.Clip = geometry;
-        }
-
-        private void RootBorder_SizeChanged(object sender, SizeChangedEventArgs e)
-        {
-            //  尺寸变化时半径与裁切要一起重算：ApplyCornerRadius 可能早于首次布局执行，
-            //  那时 RootBorder 实际尺寸还是 0x0，裁切会因尺寸为 0 被跳过
-            UpdateRoundedCorners();
-        }
 
         private void OnBackCommand(object sender, ExecutedRoutedEventArgs e)
         {
@@ -534,8 +473,6 @@ namespace UI.Controls.Window
 
             if (RootBorder != null)
             {
-                RootBorder.SizeChanged -= RootBorder_SizeChanged;
-                RootBorder.SizeChanged += RootBorder_SizeChanged;
                 UpdateRoundedCorners();
             }
         }

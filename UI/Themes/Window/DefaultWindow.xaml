@@ -52,10 +52,11 @@
         <!--<Setter Property="BorderThickness" Value="1" />-->
         <!--<Setter Property="BorderBrush" Value="{DynamicResource WindowBorderBrush}" />-->
         <Setter Property="Background" Value="Transparent" />
-        <!--AllowsTransparency（layered 窗口）：圆角由 WPF 渲染任意半径（DWM 三档平台限制的解法），
-            强制要求 WindowStyle=None；系统阴影消失，由模板内九宫格自绘阴影替代-->
+        <!--非分层窗口：圆角与毛玻璃一起交给 DWM，两者天然对齐。
+            分层窗口虽然能让 WPF 画任意半径圆角，但 DWM 的毛玻璃按窗口矩形铺、
+            不认 WPF 圆角，圆角处会露出那层的直角（现象：上面圆角、下面直角）。-->
         <Setter Property="WindowStyle" Value="None" />
-        <Setter Property="AllowsTransparency" Value="True" />
+        <Setter Property="AllowsTransparency" Value="False" />
         <!--<Setter Property="Logo" Value="{DynamicResource WindowLogo}" />-->
         <Setter Property="Foreground" Value="{DynamicResource StandardTextBrush}" />
 
@@ -96,7 +97,7 @@
                     <!--  layered 窗口命中托底：玻璃模式下窗口表面大部分像素 alpha=0，
                           而分层窗口按像素 alpha 命中——alpha=0 区域点击会穿透到后面的窗口
                           （表现为"一点击就切到后台"）。alpha=1 的底色肉眼不可见但让全窗可命中 -->
-                    <Border x:Name="WindowBorder" RenderTransformOrigin="0.5,0.5" Background="#01000000">
+                    <Border x:Name="WindowBorder" RenderTransformOrigin="0.5,0.5" Background="Transparent">
                         <Border.RenderTransform>
                             <ScaleTransform x:Name="WindowScale" ScaleX="1" ScaleY="1"/>
                         </Border.RenderTransform>
@@ -107,7 +108,6 @@
                             BorderThickness="1"
                                 BorderBrush="{DynamicResource WindowBorderBrush}"
                                 Background="{DynamicResource WindowBackground}"
-                                CornerRadius="0"
                                 ClipToBounds="True"
                                 Padding="0.5"
                                 >

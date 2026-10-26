@@ -47,7 +47,7 @@ namespace Core.Servicers.Instances
                         HandleLoadFail("配置文件内容为空或反序列化结果为 null", configText);
                         return;
                     }
-                    MigrateWindowCornerRadius(configText, config);
+                    MigrateWindowCornerStyle(configText, config);
                 }
                 else
                 {
@@ -81,21 +81,36 @@ namespace Core.Servicers.Instances
         }
 
         /// <summary>
-        /// 一次性迁移：圆角可调范围 0-8 → 0-24 后，旧默认值 8 升到新默认 12。
-        /// 读原始 JSON 里的保存值判断（保存为其他值不动），迁移落盘后不会反复触发
+        /// 一次性迁移：圆角从"任意像素滑块"改成"系统档位"后，把旧的半径值折算成档位。
+        /// 0 → 直角，1~11 → 小圆角，12 及以上 → 圆角。只在原始 JSON 里还留有旧字段时触发
         /// </summary>
-        private static void MigrateWindowCornerRadius(string configText, ConfigModel config)
+        private static void MigrateWindowCornerStyle(string configText, ConfigModel config)
         {
             if (config?.General == null || string.IsNullOrEmpty(configText))
             {
                 return;
             }
+
             try
             {
                 var raw = JObject.Parse(configText);
-                if ((int?)raw["General"]?["WindowCornerRadius"] == 8)
+                var oldRadius = (int?)raw["General"]?["WindowCornerRadius"];
+                if (oldRadius == null)
                 {
-                    config.General.WindowCornerRadius = 12;
+                    return;
+                }
+
+                if (oldRadius.Value <= 0)
+                {
+                    config.General.WindowCornerStyle = 0;
+                }
+                else if (oldRadius.Value < 12)
+                {
+                    config.General.WindowCornerStyle = 1;
+                }
+                else
+                {
+                    config.General.WindowCornerStyle = 2;
                 }
             }
             catch

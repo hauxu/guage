@@ -28,9 +28,9 @@ namespace UI.Base
         private const int DWMWA_USE_IMMERSIVE_DARK_MODE = 20;
         //  Windows 11 窗口圆角偏好
         private const int DWMWA_WINDOW_CORNER_PREFERENCE = 33;
-        private const int DWMWCP_DONOTROUND = 1;
-        private const int DWMWCP_ROUND = 2;
-        private const int DWMWCP_ROUNDSMALL = 3;
+        private const int DWMCP_DONOTROUND = 1;
+        private const int DWMCP_ROUND = 2;
+        private const int DWMCP_ROUNDSMALL = 3;
 
         //  亚克力自 Windows 10 1803 起可用，这里只面向 Windows 11
         private const int MinimumBuild = 22000;
@@ -282,44 +282,6 @@ namespace UI.Base
         /// <summary>
         /// 同步系统绘制部分的深浅色，避免深色主题下窗口外框仍是浅色。
         /// </summary>
-        /// <summary>
-        /// 着色层不做可辨识的填色时用的 alpha。DWM 的 accent 是按**窗口矩形**铺的，
-        /// 只要它带可见颜色，圆角处就会露出那一层的直角（"上面圆角、下面直角"）。
-        /// 把 alpha 压到 1（≈0.4%）后：模糊still在，颜色改由 WPF 侧主题笔刷在圆角内绘制，
-        /// 于是既有抗锯齿圆角、也保住了外发光阴影。
-        /// </summary>
-        private const byte BlurOnlyTintAlpha = 1;
-
-        /// <summary>
-        /// 只上模糊、不上色。颜色由 WPF 主题笔刷负责，避免 DWM 那层把圆角填平。
-        /// 注意不要走 Apply()：那里的 MinimumTintAlpha 兜底会把 alpha 抬到 48。
-        /// </summary>
-        public static bool ApplyBlurOnly(System.Windows.Window window, System.Windows.Media.Color tint)
-        {
-            if (window == null || !IsSupported)
-            {
-                return false;
-            }
-
-            IntPtr hwnd = new WindowInteropHelper(window).Handle;
-            if (hwnd == IntPtr.Zero)
-            {
-                return false;
-            }
-
-            if (!SubmitAccent(hwnd, true, tint, BlurOnlyTintAlpha))
-            {
-                return false;
-            }
-
-            _hasSubmitted = true;
-            _lastEnabled = true;
-            _lastTint = tint;
-            _lastAlpha = BlurOnlyTintAlpha;
-            _lastHwnd = hwnd;
-            return true;
-        }
-
         public static void SetDarkMode(System.Windows.Window window, bool isDark)
         {
             if (window == null || !IsSupported)
@@ -340,7 +302,18 @@ namespace UI.Base
         /// <summary>
         /// 设置窗口是否使用系统圆角。最大化时应关闭，否则边缘会留出空隙。
         /// </summary>
-        public static void SetRoundedCorners(System.Windows.Window window, int cornerRadius, bool isActive = true)
+        /// <summary>
+        /// 圆角档位，与 GeneralModel.WindowCornerStyle 的取值一一对应。
+        /// </summary>
+        public const int CornerStyleSquare = 0;
+        public const int CornerStyleSmall = 1;
+        public const int CornerStyleRound = 2;
+
+        /// <summary>
+        /// 设置窗口圆角。非分层窗口由 DWM 裁形，圆角因此与毛玻璃对齐。
+        /// DWM 只认固定档位，不接受任意半径。
+        /// </summary>
+        public static void SetRoundedCorners(System.Windows.Window window, int cornerStyle, bool isActive = true)
         {
             if (window == null || !IsSupported)
             {
@@ -353,23 +326,21 @@ namespace UI.Base
                 return;
             }
 
-            int preference = GetCornerPreference(cornerRadius, isActive);
+            int preference = GetCornerPreference(cornerStyle, isActive);
             DwmSetWindowAttribute(hwnd, DWMWA_WINDOW_CORNER_PREFERENCE, ref preference, sizeof(int));
         }
 
-        private static int GetCornerPreference(int cornerRadius, bool isActive)
+        /// <summary>
+        /// 档位 → DWM 圆角偏好。最大化时一律直角。
+        /// </summary>
+        private static int GetCornerPreference(int cornerStyle, bool isActive)
         {
-            if (!isActive || cornerRadius <= 0)
+            if (!isActive || cornerStyle == CornerStyleSquare)
             {
-                return DWMWCP_DONOTROUND;
+                return DWMCP_DONOTROUND;
             }
 
-            if (cornerRadius <= 8)
-            {
-                return DWMWCP_ROUNDSMALL;
-            }
-
-            return DWMWCP_ROUND;
+            return cornerStyle == CornerStyleSmall ? DWMCP_ROUNDSMALL : DWMCP_ROUND;
         }
     }
 }

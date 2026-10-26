@@ -76,9 +76,9 @@ namespace UI.Servicers
                 UpdateBackdrop();
             }
 
-            if (oldConfig.General.WindowCornerRadius != newConfig.General.WindowCornerRadius)
+            if (oldConfig.General.WindowCornerStyle != newConfig.General.WindowCornerStyle)
             {
-                UpdateWindowCornerRadius();
+                UpdateWindowCornerStyle();
             }
 
             if (oldConfig.General.FontSizePercent != newConfig.General.FontSizePercent)
@@ -101,8 +101,7 @@ namespace UI.Servicers
 public void ApplyAppearancePreview(bool committed = true)
 {
     UpdateBackdrop(committed);
-    //  圆角拖动中实时预览：应用只是 CornerRadius/Clip 属性赋值，不重提交 accent，无闪烁
-    UpdateWindowCornerRadius();
+    UpdateWindowCornerStyle();
     ApplyFontScale(false);
 }
         public void LoadTheme(string themeName, bool isRefresh = false)
@@ -338,7 +337,7 @@ public void ApplyAppearancePreview(bool committed = true)
             HandleWindowSizeChangedEvent();
             //  主窗口是在主题加载之后才创建的，这里补一次材质应用
             UpdateBackdrop();
-            UpdateWindowCornerRadius();
+            UpdateWindowCornerStyle();
 
             if (mainWindow?.PageContainer != null)
             {
@@ -395,16 +394,16 @@ public void ApplyAppearancePreview(bool committed = true)
             fontScaleDebounceTimer.Start();
         }
 
-        private void UpdateWindowCornerRadius()
+        private void UpdateWindowCornerStyle()
         {
             if (mainWindow == null || mainWindow.IsWindowClosed)
             {
                 return;
             }
 
-            //  layered 窗口 WPF 直渲染任意半径：0=直角，1-24px 平滑调节
-            int radius = Math.Min(24, Math.Max(0, appConfig.GetConfig().General.WindowCornerRadius));
-            mainWindow.ApplyCornerRadius(radius);
+            //  圆角由 DWM 绘制，只有系统提供的几档
+            int style = Math.Max(0, Math.Min(2, appConfig.GetConfig().General.WindowCornerStyle));
+            mainWindow.ApplyCornerStyle(style);
         }
 
         private void HandleWindowSizeChangedEvent()

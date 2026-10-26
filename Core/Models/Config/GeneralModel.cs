@@ -34,11 +34,12 @@ namespace Core.Models.Config
             Group = "外观", IsSlider = true, Min = 0, Max = 100, Unit = "%")]
         public int GlassTransparency { get; set; } = 100;
         /// <summary>
-        /// 非最大化状态下的窗口圆角。0=直角，1-24px 任意调节（默认 12）。
+        /// 非最大化状态下的窗口圆角档位。圆角由系统绘制，因此只有系统提供的几档。
         /// </summary>
-        [Config(Name = "窗口圆角", Description = "非最大化状态下的窗口圆角，可拖动滑块实时预览。0=直角，1-24px 任意调节，默认 12px。",
-            Group = "外观", IsSlider = true, Min = 0, Max = 24, Unit = "px")]
-        public int WindowCornerRadius { get; set; } = 12;
+        [Config(Options = "直角|小圆角|圆角", Name = "窗口圆角",
+            Description = "非最大化状态下的窗口圆角。圆角由系统绘制，只有直角、小圆角、圆角三档。",
+            Group = "外观")]
+        public int WindowCornerStyle { get; set; } = 2;
         /// <summary>
         /// 界面字体大小百分比。105 为默认大小。
         /// </summary>
