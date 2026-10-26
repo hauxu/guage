@@ -288,8 +288,21 @@
                                     <Path.CacheMode><BitmapCache/></Path.CacheMode>
                                 </Path>
                                 <!--箱底沙地 + 鹅卵石（童年水机地台）-->
-                                <Path Stretch="None" Fill="#8A6B4226"
+                                <Path Stretch="None"
                                       Data="M0,368 Q60,360 118,368 T236,368 T354,368 T472,368 V400 H0 Z"
+                                      IsHitTestVisible="False">
+                                    <Path.Fill>
+                                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                            <GradientStop Color="#8CD8B98A" Offset="0"/>
+                                            <GradientStop Color="#B07A5433" Offset="0.45"/>
+                                            <GradientStop Color="#D2553A22" Offset="1"/>
+                                        </LinearGradientBrush>
+                                    </Path.Fill>
+                                    <Path.CacheMode><BitmapCache/></Path.CacheMode>
+                                </Path>
+                                <!--沙面高光：一条随沙丘起伏的亮边，让沙地有受光面-->
+                                <Path Stretch="None" Stroke="#7AFFF0D8" StrokeThickness="1.6"
+                                      Data="M0,368 Q60,360 118,368 T236,368 T354,368 T472,368"
                                       IsHitTestVisible="False">
                                     <Path.CacheMode><BitmapCache/></Path.CacheMode>
                                 </Path>

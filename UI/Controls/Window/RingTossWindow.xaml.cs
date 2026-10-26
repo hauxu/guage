@@ -99,6 +99,8 @@ namespace UI.Controls.Window
             public int Column;
             public int StackIndex;
             public int Bounces;
+            /// <summary>低速/卡角持续时长，用于确定性脱困</summary>
+            public double Idle;
         }
 
         private sealed class Bubble
@@ -322,6 +324,8 @@ namespace UI.Controls.Window
         /// <summary>环流活动度（气泡的产生与消退驱动）。</summary>
         private double Activity()
         {
+            //  这里用两股环量之和、不是净值：左右泵反向注入时净环量会抵消，
+            //  但水里确实被搅动了，圈应该照样被带起来（旧写法会出现"怎么泵都不动"）
             return Math.Min(1, (_gammaCW + _gammaCCW) / 1.2);
         }
 
@@ -374,6 +378,20 @@ namespace UI.Controls.Window
                     double bump = Math.Exp(-g0 * g0) + Math.Exp(-g1 * g1);
                     fy -= Math.Abs(gammaNet) * 150 * bump * depthMask;
                 }
+            }
+
+            //  壁面粘滞（no-slip）：贴壁处水平流速趋近于零。缺这一条时环流会把圈
+            //  一路顶到侧壁、沿壁堆成一列，看起来像贴在玻璃上而不是漂在水里
+            double wallFade = Math.Min((x - 18) / 54.0, (BoardW - 18 - x) / 54.0);
+            fx *= Math.Max(0.10, Math.Min(1, wallFade));
+
+            //  底部常驻上涌：真实水机泵动时是整箱水被顶起来，不是只有柱口附近上涌。
+            //  这条与"按哪边泵"无关、强度随总环量与搅动增强，保证底角永远不是死水区
+            double depth = (FloatBottom + 4 - y) / (FloatBottom + 4 - TipY);
+            if (depth > 0)
+            {
+                double up = 30 + 120 * Math.Min(1, Activity() + 0.7 * _stirBoost);
+                fy -= up * Math.Min(1, depth) * Math.Min(1, depth);
             }
 
             // 限幅：数值稳定性（避免中心区速度发散）
@@ -495,7 +513,7 @@ namespace UI.Controls.Window
             shaftFill.Freeze();
             var shaft = new Rectangle
             {
-                Width = 5,
+                Width = 7,
                 Height = ShaftBottomY - NeedleBaseY,
                 RadiusX = 2.5,
                 RadiusY = 2.5,
@@ -504,9 +522,23 @@ namespace UI.Controls.Window
                 StrokeThickness = 0.7,
                 IsHitTestVisible = false
             };
-            Canvas.SetLeft(shaft, x - 2.5);
+            Canvas.SetLeft(shaft, x - 3.5);
             Canvas.SetTop(shaft, NeedleBaseY);
             BoardCanvas.Children.Add(shaft);
+
+            //  柱身高光条：让塑料柱有个受光的圆柱面，而不是一条平涂的色带
+            var shaftGloss = new Rectangle
+            {
+                Width = 2,
+                Height = ShaftBottomY - NeedleBaseY - 8,
+                RadiusX = 1,
+                RadiusY = 1,
+                Fill = new SolidColorBrush(Color.FromArgb(0x6E, 0xFF, 0xFF, 0xFF)),
+                IsHitTestVisible = false
+            };
+            Canvas.SetLeft(shaftGloss, x - 2.1);
+            Canvas.SetTop(shaftGloss, NeedleBaseY + 4);
+            BoardCanvas.Children.Add(shaftGloss);
 
             var spec = new Rectangle
             {
@@ -646,14 +678,21 @@ namespace UI.Controls.Window
 
             var body = new Ellipse
             {
-                StrokeThickness = 6,
+                StrokeThickness = 7,
                 Stroke = stroke
+            };
+            //  内缘压暗：给环一个截面厚度感（纯描边看起来像铁丝）
+            var innerRim = new Ellipse
+            {
+                StrokeThickness = 1.6,
+                Stroke = new SolidColorBrush(Color.FromArgb(0x38, 0x00, 0x1A, 0x2B)),
+                Margin = new Thickness(-2.6)
             };
             var gloss = new Ellipse
             {
-                StrokeThickness = 1.4,
-                Stroke = new SolidColorBrush(Color.FromArgb(0x59, 0xFF, 0xFF, 0xFF)),
-                Margin = new Thickness(2.6)
+                StrokeThickness = 1.8,
+                Stroke = new SolidColorBrush(Color.FromArgb(0x80, 0xFF, 0xFF, 0xFF)),
+                Margin = new Thickness(3.0)
             };
             var grid = new Grid
             {
@@ -669,6 +708,7 @@ namespace UI.Controls.Window
             group.Children.Add(tilt);
             grid.RenderTransform = group;
             grid.Children.Add(body);
+            grid.Children.Add(innerRim);
             grid.Children.Add(gloss);
 
             var shadow = new Ellipse
@@ -896,6 +936,13 @@ namespace UI.Controls.Window
                         a.Y -= ny * push;
                         b.X += nx * push;
                         b.Y += ny * push;
+
+                        //  投影后立刻夹回水箱：否则圈会被推进墙体，
+                        //  下一帧被 Contain 拉回时速度方向仍是"朝墙"，在那儿反复顶死
+                        a.X = Math.Max(26, Math.Min(BoardW - 26, a.X));
+                        a.Y = Math.Max(14, Math.Min(FloatBottom + 4, a.Y));
+                        b.X = Math.Max(26, Math.Min(BoardW - 26, b.X));
+                        b.Y = Math.Max(14, Math.Min(FloatBottom + 4, b.Y));
                     }
                 }
             }
@@ -987,7 +1034,13 @@ namespace UI.Controls.Window
                         double relax = Math.Min(1, (1.5 + 6.5 * act) * dt);
                         ring.Vx += (fx - ring.Vx) * relax;
                         ring.Vy += (fy - ring.Vy) * relax;
-                        ring.Vy += (ring.BaseY - ring.Y) * springK * dt;
+
+                        //  弹簧目标随水流上浮：静水时回到各自的 BaseY（底部静息带），
+                        //  水一搅起来整片圈被抬向涡强区。旧写法永远拉回 BaseY，
+                        //  等于把圈焊在底角——这正是"搅几次就再也浮不起来"的主因
+                        double liftSpan = (FloatBottom - TipY) * 0.62 * Math.Min(1, act + 0.8 * _stirBoost);
+                        double targetY = Math.Max(TipY + 26, ring.BaseY - liftSpan);
+                        ring.Vy += (targetY - ring.Y) * springK * dt;
                         ring.Vy -= ring.Vy * 1.3 * dt;
                         ring.Vx += Turb3(now * 0.5, ring.P1, ring.P2, ring.P3) * (7 + 34 * shear) * dt;
                         ring.Vy += Math.Sin(now * ring.BobFreq + ring.BobPhase) * 13 * dt;
@@ -999,6 +1052,20 @@ namespace UI.Controls.Window
                         //  常驻离壁/离底斥力位场（不依赖环量）：死水期角落不再是准驻留点。
                         //  距边 <56px 时按深度二次推离，底边推力最大、侧壁次之
                         ApplyWallRepulsion(ring, dt);
+
+                        //  确定性脱困：卡在底角、或者速度已经很小的圈，给一点朝向柱子的推力。
+                        //  没有这条的话，环量衰减到底流之后圈会永久停在角落，
+                        //  用户怎么泵都带不起来（每次泵只加环量，圈本身没有脱离手段）
+                        bool cornerPin = ring.Y > FloatBottom - 34 && (ring.X < 74 || ring.X > BoardW - 74);
+                        bool sleepy = Math.Abs(ring.Vx) + Math.Abs(ring.Vy) < 26;
+                        ring.Idle = (cornerPin || sleepy) ? ring.Idle + dt : 0;
+                        if (ring.Idle > 0.45)
+                        {
+                            double towardX = ColumnX[ring.X < VortexCx ? 0 : 1];
+                            ring.Vx += Math.Sign(towardX - ring.X) * 200 * dt;
+                            ring.Vy -= 230 * dt;
+                            if (ring.Idle > 4) ring.Idle = 0;   // 避免长时间单方向积分
+                        }
 
                         ring.X += ring.Vx * dt;
                         ring.Y += ring.Vy * dt;
@@ -1104,6 +1171,11 @@ namespace UI.Controls.Window
 
                         ring.X += ring.Vx * dt;
                         ring.Y += ring.Vy * dt;
+
+                        //  落地判定必须抢在 Contain 之前：Contain 会把 Y 夹到 FloatBottom+4，
+                        //  之后再判 "Y > FloatBottom+4" 永远为假，落地分支永不执行 ——
+                        //  圈就永久停在 Ballistic 态、被夹在水底，怎么搅都起不来
+                        bool hitFloor = ring.Y >= FloatBottom + 4;
                         Contain(ring);
                         ring.Tilt.Angle += ring.AngVel * dt;
                         ring.AngVel *= Math.Exp(-1.8 * dt);
@@ -1146,8 +1218,15 @@ namespace UI.Controls.Window
                         }
                         ring.PrevY = ring.Y;
 
-                        // 落回水底
-                        if (ring.Y > FloatBottom + 4)
+                        //  兜底：贴底且几乎不动时也回漂浮态。落地分支依赖精确触底，
+                        //  一旦因为数值抖动错过，圈会永久停在 Ballistic（贴底不动）
+                        if (ring.State == StateBallistic && ring.Y > FloatBottom - 6 && Math.Abs(ring.Vy) < 45)
+                        {
+                            hitFloor = true;
+                        }
+
+                        // 落回水底（hitFloor 在 Contain 之前采样）
+                        if (hitFloor)
                         {
                             if (ring.Vy > 110)
                             {
@@ -1164,7 +1243,7 @@ namespace UI.Controls.Window
                                 {
                                     ring.State = StateFloat;
                                     ring.Guided = false;
-                                    ring.BaseY = FloatTop + (FloatBottom - FloatTop) * (0.25 + 0.5 * _random.NextDouble());
+                                    ring.BaseY = FloatTop + (FloatBottom - FloatTop) * (0.05 + 0.9 * _random.NextDouble());
                                 }
                                 else
                                 {
@@ -1179,7 +1258,7 @@ namespace UI.Controls.Window
                                 ring.Guided = false;
                                 //  落底不回最深 BaseY：随机模式的圈落回浅水带，
                                 //  生活区上移到涡强区，避免被重新钉死在底角
-                                ring.BaseY = FloatTop + (FloatBottom - FloatTop) * (0.25 + 0.5 * _random.NextDouble());
+                                ring.BaseY = FloatTop + (FloatBottom - FloatTop) * (0.05 + 0.9 * _random.NextDouble());
                                 ring.Tilt.Angle = 0;
                                 SpawnRipple(ring.X, 372);
                             }

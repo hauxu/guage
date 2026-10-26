@@ -405,8 +405,9 @@ namespace UI.Controls.Window
 
         private void RootBorder_SizeChanged(object sender, SizeChangedEventArgs e)
         {
-            int radius = WindowState == WindowState.Maximized ? 0 : configuredCornerRadius;
-            UpdateRootBorderClip(radius);
+            //  尺寸变化时半径与裁切要一起重算：ApplyCornerRadius 可能早于首次布局执行，
+            //  那时 RootBorder 实际尺寸还是 0x0，裁切会因尺寸为 0 被跳过
+            UpdateRoundedCorners();
         }
 
         private void OnBackCommand(object sender, ExecutedRoutedEventArgs e)
