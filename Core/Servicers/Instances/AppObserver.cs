@@ -71,6 +71,15 @@ namespace Core.Servicers.Instances
             _delayDetectTimer?.Start();
         }
 
+        /// <summary>
+        /// 立刻重新探测当前前台应用：清掉上次记录的句柄再走一次 DelayDetect。
+        /// </summary>
+        public void ForceDetectForeground()
+        {
+            _lastForegroundHwnd = IntPtr.Zero;
+            DelayDetect();
+        }
+
         private void DelayDetect()
         {
             try

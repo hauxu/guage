@@ -354,6 +354,12 @@ namespace Core.Servicers.Instances
                 return;
             }
 
+            //  启动时前台可能是 guage 自己（被过滤掉），这里主动补探一次，避免长时间空转
+            if (string.IsNullOrEmpty(_activeApp.Process))
+            {
+                _appObserver?.ForceDetectForeground();
+            }
+
             // 会话级禁止重启：被禁进程若被重新启动，立即再次结束
             EnforceBanRestart();
 
@@ -423,6 +429,10 @@ namespace Core.Servicers.Instances
                 else
                 {
                     _triggeredToday.Add(ruleKey);
+                    //  本次运行里刚执行过动作，同样记入已处置集合。
+                    //  否则动作结束（例如进程已被关闭）后的下一跳会再走一次“补救触发”，
+                    //  同一条规则一天里弹两次
+                    _reArmedToday.Add(ruleKey);
                 }
 
                 _actingRules.Add(ruleKey);

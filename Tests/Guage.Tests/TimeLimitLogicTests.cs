@@ -27,7 +27,7 @@ namespace Guage.Tests
         {
             Run("规则匹配-进程名命中", TestFindByName);
             Run("规则匹配-禁用规则跳过", TestFindSkipsDisabled);
-            Run("规则匹配-路径精确匹配", TestFindByPath);
+            Run("规则匹配-路径精确与版本化目录", TestFindByPath);
             Run("规则键-命中与兜底", TestRuleKey);
             Run("路径归一化-相对路径与空白", TestNormalizePath);
             Run("随机密码-长度与字符集", TestPassword);
@@ -36,6 +36,7 @@ namespace Guage.Tests
             Run("时长限制-延长后允许再次触发", TestExtensionAllowsRetrigger);
             Run("时长限制-跨天重置用量与标记", TestNewDayResetsUsageAndMarkers);
             Run("路径归一化-大小写与相对路径", TestNormalizePathCaseAndRelative);
+            Run("规则匹配-同名不同安装目录仍命中", TestFindByVersionedPath);
         }
 
         private static void TestFindByName()
@@ -61,7 +62,7 @@ namespace Guage.Tests
         private static void TestFindByPath()
         {
             string chromePath = "C:" + System.IO.Path.DirectorySeparatorChar + "Apps" + System.IO.Path.DirectorySeparatorChar + "Chrome" + System.IO.Path.DirectorySeparatorChar + "chrome.exe";
-            string otherPath = "D:" + System.IO.Path.DirectorySeparatorChar + "Other" + System.IO.Path.DirectorySeparatorChar + "chrome.exe";
+            string otherPath = "D:" + System.IO.Path.DirectorySeparatorChar + "Other" + System.IO.Path.DirectorySeparatorChar + "chromium.exe";
             var rules = new List<TimeLimitRuleModel>
             {
                 new TimeLimitRuleModel { ProcessName = "Chrome", Enabled = true, ExecutablePath = chromePath }
@@ -69,7 +70,24 @@ namespace Guage.Tests
             var rightApp = new AppInfo(IntPtr.Zero, 1, "chrome", "", chromePath, AppType.Win32);
             var wrongApp = new AppInfo(IntPtr.Zero, 2, "chrome", "", otherPath, AppType.Win32);
             Assert.IsNotNull(TimeLimitLogic.FindRule(rules, rightApp), "路径一致应命中");
-            Assert.IsNull(TimeLimitLogic.FindRule(rules, wrongApp), "路径不一致应跳过");
+            Assert.IsNull(TimeLimitLogic.FindRule(rules, wrongApp), "文件名不同应跳过");
+        }
+
+        /// <summary>
+        /// 有的软件装在带版本号的子目录里（QQMusic2276.01.13.46 之类），升级后完整路径会变。
+        /// 这种情况下只要文件名一致就应当命中，否则用户设的限制会在软件升级后永久失效。
+        /// </summary>
+        private static void TestFindByVersionedPath()
+        {
+            var rules = new List<TimeLimitRuleModel>
+            {
+                new TimeLimitRuleModel { ProcessName = "QQMusic", Enabled = true,
+                    ExecutablePath = @"D:\QQMusic\QQMusic.exe" }
+            };
+            var app = new AppInfo(IntPtr.Zero, 1, "QQMusic", "",
+                @"D:\QQMusic\QQMusic2276.01.13.46\QQMusic.exe", AppType.Win32);
+
+            Assert.IsNotNull(TimeLimitLogic.FindRule(rules, app), "版本化子目录应仍命中同名规则");
         }
 
         private static void TestRuleKey()
@@ -360,6 +378,8 @@ namespace Guage.Tests
 
         private sealed class FakeAppObserver : IAppObserver
         {
+            public void ForceDetectForeground() { }
+
             public void Start() { }
 
             public void Stop() { }

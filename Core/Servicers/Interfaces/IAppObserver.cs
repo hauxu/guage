@@ -25,5 +25,10 @@ namespace Core.Servicers.Interfaces
         /// 切换活跃APP时发生
         /// </summary>
         event AppObserverEventHandler OnAppActiveChanged;
+        /// <summary>
+        /// 立刻重新探测一次当前前台应用（启动时或前台为空时兜底）。
+        /// </summary>
+        void ForceDetectForeground();
+
     }
 }

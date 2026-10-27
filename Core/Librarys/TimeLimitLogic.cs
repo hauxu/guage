@@ -51,6 +51,24 @@ namespace Core.Librarys
             return collapsed;
         }
 
+        /// <summary>
+        /// 两个路径的文件名是否相同（忽略大小写）。用于版本化安装目录的兼容判断。
+        /// </summary>
+        private static bool IsSameFileName(string a, string b)
+        {
+            try
+            {
+                return string.Equals(
+                    System.IO.Path.GetFileName(NormalizePath(a)),
+                    System.IO.Path.GetFileName(NormalizePath(b)),
+                    StringComparison.OrdinalIgnoreCase);
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
         public static string GetRuleKey(TimeLimitRuleModel rule)
         {
             if (rule == null)
@@ -115,13 +133,20 @@ namespace Core.Librarys
                 }
 
                 if (!string.IsNullOrWhiteSpace(rule.ExecutablePath)
-                    && !string.IsNullOrWhiteSpace(app.ExecutablePath)
-                    && !string.Equals(
+                    && !string.IsNullOrWhiteSpace(app.ExecutablePath))
+                {
+                    bool samePath = string.Equals(
                         NormalizePath(rule.ExecutablePath),
                         NormalizePath(app.ExecutablePath),
-                        StringComparison.OrdinalIgnoreCase))
-                {
-                    continue;
+                        StringComparison.OrdinalIgnoreCase);
+
+                    //  有的软件装在带版本号的子目录里（如 QQMusic\QQMusic2276.01.13.46\QQMusic.exe），
+                    //  升级后完整路径就变了，只比全路径会让规则彻底失效。进程名已经对上时，
+                    //  再退一步只比文件名
+                    if (!samePath && !IsSameFileName(rule.ExecutablePath, app.ExecutablePath))
+                    {
+                        continue;
+                    }
                 }
 
                 return rule;
