@@ -182,6 +182,16 @@ namespace UI.ViewModels
         /// <summary>
         /// 页面可见时启动自动刷新（幂等，5 秒周期整表刷新）。
         /// </summary>
+        /// <summary>
+        /// 立即刷新一次：窗口从托盘弹出、或刚进入页面时调用，不必等定时刷新。
+        /// </summary>
+        public void RefreshNow()
+        {
+            LoadData(showLoadingPlaceholder: false);
+            UpdateTotalDuration();
+            StartLiveUpdates();
+        }
+
         public void StartAutoRefresh()
         {
             if (_autoRefreshSubscription == null)

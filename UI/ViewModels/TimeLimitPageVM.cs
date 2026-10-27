@@ -534,6 +534,10 @@ namespace UI.ViewModels
             _config.TimeLimit.IsEnabled = IsEnabled;
             _config.TimeLimit.Rules = RuleItems.Select(m => CloneRule(m.Model)).ToList();
             _appConfig.Save();
+
+            //  服务只在 Start() 时读过一次配置：这里不通知就永远不生效，
+            //  表现就是「启用了、也加了规则，但三个动作都没反应」
+            _timeLimitServicer.Reload();
         }
 
         private TimeLimitRuleItemVM CreateRuleItem(TimeLimitRuleModel rule)

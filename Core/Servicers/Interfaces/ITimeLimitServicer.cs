@@ -15,6 +15,9 @@ namespace Core.Servicers.Interfaces
         /// 并从数据库把今日各应用已用时长重新同步到内存，
         /// 保证时长限制功能在跨天/外部数据变化后正常工作。
         /// </summary>
+        /// <summary>
+        /// 重新加载配置（启用状态与规则列表），界面改动后立即生效。
+        void Reload();
         void ResyncToday();
     }
 }

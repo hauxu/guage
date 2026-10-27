@@ -1,18 +1,6 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using UI.Controls.Charts.Model;
 using UI.ViewModels;
 
 namespace UI.Views
@@ -22,23 +10,52 @@ namespace UI.Views
     /// </summary>
     public partial class IndexPage : Page
     {
+        private readonly IndexPageVM vm;
+        private Window hostWindow;
+
         public IndexPage(IndexPageVM vm)
         {
             InitializeComponent();
             DataContext = vm;
-            //  页面可见时启动实时刷新（活跃应用秒级更新 + 5 秒整表刷新），
-            //  离开页面时停止，避免后台空转
-            Loaded += (_, __) =>
+            this.vm = vm;
+
+            Loaded += OnLoaded;
+            Unloaded += OnUnloaded;
+        }
+
+        private void OnLoaded(object sender, RoutedEventArgs e)
+        {
+            vm.RefreshBrowserExtensionStatus();
+            vm.RefreshNow();
+
+            //  窗口被托盘收起再打开时页面不会重新 Loaded，这里跟窗口可见性挂钩：
+            //  一显示就立刻刷一次，不必等到下一个 tick
+            hostWindow = Window.GetWindow(this);
+            if (hostWindow != null)
             {
-                vm.RefreshBrowserExtensionStatus();
-                vm.StartLiveUpdates();
-                vm.StartAutoRefresh();
-            };
-            Unloaded += (_, __) =>
+                hostWindow.IsVisibleChanged -= HostWindow_IsVisibleChanged;
+                hostWindow.IsVisibleChanged += HostWindow_IsVisibleChanged;
+            }
+        }
+
+        private void OnUnloaded(object sender, RoutedEventArgs e)
+        {
+            if (hostWindow != null)
             {
-                vm.StopLiveUpdates();
-                vm.StopAutoRefresh();
-            };
+                hostWindow.IsVisibleChanged -= HostWindow_IsVisibleChanged;
+                hostWindow = null;
+            }
+
+            vm.StopLiveUpdates();
+            vm.StopAutoRefresh();
+        }
+
+        private void HostWindow_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            if (e.NewValue is bool visible && visible)
+            {
+                vm.RefreshNow();
+            }
         }
     }
 }

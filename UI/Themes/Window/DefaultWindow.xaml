@@ -139,7 +139,7 @@
                                             <!--标题区域-->
                                             <StackPanel Orientation="Horizontal" Margin="15,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Center">
 
-                                                <button:IconButton Width="26" Height="26" Margin="0,0,4,0" VerticalAlignment="Center" ToolTip="返回" FontSize="10" x:Name="BackBtn" Icon="Back"  WindowChrome.IsHitTestVisibleInChrome="True" Command="{x:Static w:DefaultWindowCommands.BackCommand}"/>
+                                                <button:IconButton Width="26" Height="26" Margin="0,0,4,0" VerticalAlignment="Center" ToolTip="返回" FontSize="10" x:Name="BackBtn" Icon="Back" Visibility="Collapsed" WindowChrome.IsHitTestVisibleInChrome="True" Command="{x:Static w:DefaultWindowCommands.BackCommand}"/>
 
                                                 <Image Source="{TemplateBinding Icon}" VerticalAlignment="Center" Stretch="Uniform" Width="18"/>
                                                 <TextBlock VerticalAlignment="Center" Text="{TemplateBinding Title}" IsEnabled="{TemplateBinding IsActive}" Foreground="{DynamicResource DefaultTextBrush}" Margin="15,0,0,0"/>
@@ -191,7 +191,13 @@
                                                     FontSize="10"
                                                     Icon="ChromeClose"
                                                     Command="{x:Static w:DefaultWindowCommands.CloseWindowCommand}"
-                                                    Visibility="{TemplateBinding CloseVisibility}"/>
+                                                    Visibility="{TemplateBinding CloseVisibility}">
+                                                    <!--关闭键单独用红色悬停：模板里的悬停色走 DynamicResource，
+                                                        在这里覆盖一层即可，只影响这一个按钮-->
+                                                    <button:IconButton.Resources>
+                                                        <Color x:Key="HoverBackgroundColor">#E81123</Color>
+                                                    </button:IconButton.Resources>
+                                                </button:IconButton>
 
                                             </StackPanel>
 
@@ -306,12 +312,20 @@
                                     <VisualTransition GeneratedDuration="0"
                                   To="Pressed" />
                                 </VisualStateGroup.Transitions>
-                                <VisualState x:Name="Normal" />
+                                <!--返回键平时不显示：只有进过子页面（可返回）时才出现。
+                                    之前是用宽度 0→35 的动画来"藏"，一旦给按钮设了固定宽度就永远可见-->
+                                <VisualState x:Name="Normal">
+                                    <Storyboard>
+                                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="BackBtn" Storyboard.TargetProperty="Visibility">
+                                            <DiscreteObjectKeyFrame KeyTime="0" Value="{x:Static Visibility.Collapsed}"/>
+                                        </ObjectAnimationUsingKeyFrames>
+                                    </Storyboard>
+                                </VisualState>
                                 <VisualState x:Name="CanBackState">
-                                    <Storyboard >
-                                        <DoubleAnimation Storyboard.TargetProperty="(Button.Width)"
-                                                Storyboard.TargetName="BackBtn" To="35" Duration="0:0:.1">
-                                        </DoubleAnimation>
+                                    <Storyboard>
+                                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="BackBtn" Storyboard.TargetProperty="Visibility">
+                                            <DiscreteObjectKeyFrame KeyTime="0" Value="{x:Static Visibility.Visible}"/>
+                                        </ObjectAnimationUsingKeyFrames>
                                     </Storyboard>
                                 </VisualState>
 

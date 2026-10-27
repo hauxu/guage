@@ -161,6 +161,23 @@ namespace Core.Servicers.Instances
         /// 2. 从数据库把今日各应用已用时长同步回内存，并按实际用量重建触发标记，
         ///    保证时长限制功能正常工作。
         /// </summary>
+        /// <summary>
+        /// 重新加载配置：界面里开关或增删规则后立刻生效，不必重启软件。
+        /// 原来只在 Start() 里读一次配置，界面改动要等重启——表现就是"启用了也没反应"。
+        /// </summary>
+        public void Reload()
+        {
+            LoadSettings();
+            RestoreTodayUsage();
+
+            if (!_isStarted)
+            {
+                Start();
+            }
+
+            Logger.Info("时长限制：配置已重新加载，启用=" + _isEnabled + "，规则数=" + (_rules?.Count ?? 0));
+        }
+
         public void ResyncToday()
         {
             lock (_syncRoot)
