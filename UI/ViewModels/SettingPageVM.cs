@@ -109,7 +109,7 @@ namespace UI.ViewModels
 
                 if (!File.Exists(updaterExePath))
                 {
-                    mainVM.Toast("升级程序似乎已被删除，请手动前往发布页查看新版本", Controls.Window.ToastType.Error, Controls.Base.IconTypes.None);
+                    mainVM.Toast("升级程序不存在，请到发布页手动下载", Controls.Window.ToastType.Error, Controls.Base.IconTypes.None);
                     return;
                 }
                 File.Copy(updaterExePath, updaterCacheExePath, true);
@@ -125,7 +125,7 @@ namespace UI.ViewModels
             catch (Exception ex)
             {
                 Logger.Error(ex.Message);
-                mainVM.Toast("无法正确启动检查更新程序", Controls.Window.ToastType.Error, Controls.Base.IconTypes.None);
+                mainVM.Toast("无法启动升级程序", Controls.Window.ToastType.Error, Controls.Base.IconTypes.None);
             }
         }
 
@@ -144,7 +144,7 @@ namespace UI.ViewModels
             {
                 if (!BrowserExtensionPathHelper.TryResolveDirectory(out string path))
                 {
-                    mainVM.Toast("未找到本地扩展目录。若从商店安装可忽略；ZIP/本地载入请参考安装说明。", Controls.Window.ToastType.Info, Controls.Base.IconTypes.None);
+                    mainVM.Toast("未找到本地扩展目录", Controls.Window.ToastType.Info, Controls.Base.IconTypes.None);
                     return;
                 }
 
@@ -153,7 +153,7 @@ namespace UI.ViewModels
                     FileName = path,
                     UseShellExecute = true
                 });
-                mainVM.Toast("请在浏览器扩展页开启开发者模式，选择「加载解压缩的扩展」并指向此文件夹。", Controls.Window.ToastType.Info, Controls.Base.IconTypes.None);
+                mainVM.Toast("在扩展页开启开发者模式，「加载解压缩的扩展」指向此文件夹", Controls.Window.ToastType.Info, Controls.Base.IconTypes.None);
             }
             catch (Exception ex)
             {
@@ -224,7 +224,7 @@ namespace UI.ViewModels
             }
 
             string detail = string.IsNullOrWhiteSpace(_webServer.LastStartError)
-                ? "网站统计服务未能启动，请检查本机端口是否被占用。"
+                ? "网站统计服务未能启动，端口可能被占用"
                 : _webServer.LastStartError;
             mainVM.Toast(detail, Controls.Window.ToastType.Warning, Controls.Base.IconTypes.IncidentTriangle);
         }
@@ -235,11 +235,11 @@ namespace UI.ViewModels
             {
                 bool restartNow = await _uiServicer.ShowConfirmDialogAsync(
                     "存储位置已更改",
-                    "数据存储位置已更新。需要重启软件后，数据库、日志和图标才会完全切换到新位置。是否立即重启？");
+                    "存储位置已更新，需重启后完全生效。是否立即重启？");
 
                 if (!restartNow)
                 {
-                    mainVM.Toast("请稍后手动重启软件，使新的存储位置完全生效", Controls.Window.ToastType.Info);
+                    mainVM.Toast("请稍后手动重启，新位置才会生效", Controls.Window.ToastType.Info);
                     return;
                 }
 
@@ -250,7 +250,7 @@ namespace UI.ViewModels
             catch (Exception ex)
             {
                 Logger.Error(ex.ToString());
-                mainVM.Toast("无法自动重启，请手动关闭并重新打开软件", Controls.Window.ToastType.Error, Controls.Base.IconTypes.IncidentTriangle);
+                mainVM.Toast("无法自动重启，请手动重开软件", Controls.Window.ToastType.Error, Controls.Base.IconTypes.IncidentTriangle);
             }
         }
 

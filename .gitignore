@@ -375,3 +375,6 @@ WebExtensions/
 
 # cmd 的 "> nul" 误用会真的生成这个文件
 nul
+
+# 代理工具目录
+.zcode/

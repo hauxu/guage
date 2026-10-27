@@ -184,7 +184,7 @@ namespace UI.Controls.Window
             }
             else
             {
-                ErrorText.Text = "密码错误，请重试（连续错误不会锁定，可继续尝试）";
+                ErrorText.Text = "密码错误，请重试";
                 PasswordInput.Clear();
                 PasswordInput.Focus();
             }

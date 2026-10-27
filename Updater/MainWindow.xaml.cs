@@ -60,7 +60,7 @@ namespace Updater
         {
             if (e.PropertyName == nameof(mainModel.Version))
             {
-                githubRelease = new GithubRelease("https://api.github.com/repos/planshit/guage/releases/latest", mainModel.Version);
+                githubRelease = new GithubRelease("https://api.github.com/repos/hauxu/guage/releases/latest", mainModel.Version);
 
                 Check();
             }

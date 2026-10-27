@@ -57,7 +57,7 @@
                         <Border Background="#f51837" Padding="10,5" CornerRadius="4" Margin="0,0,0,5" VerticalAlignment="Center" HorizontalAlignment="Left" ToolTip="该应用将不再统计使用时长">
                             <StackPanel Orientation="Horizontal"  VerticalAlignment="Center">
                                 <base:Icon IconType="StatusCircleBlock" FontSize="{DynamicResource AppFontSizeSecondary}" VerticalAlignment="Center" Foreground="White"/>
-                                <TextBlock Text="已被正则忽略匹配" Foreground="White" VerticalAlignment="Center" Margin="5,0,0,0"/>
+                                <TextBlock Text="已被正则忽略" Foreground="White" VerticalAlignment="Center" Margin="5,0,0,0"/>
                             </StackPanel>
                         </Border>
                     </base:View>
@@ -194,7 +194,7 @@
                         <Grid>
                             <DatePickerBar:DatePickerBar ShowType="Month" HorizontalAlignment="Left" SelectedDate="{Binding Date,Mode=TwoWay}"/>
 
-                            <btn:Button ToolTip="清空此应用在该月的统计数据" HorizontalAlignment="Right" VerticalAlignment="Top" Background="#f51837" Foreground="White" MinWidth="120" Margin="0" Icon="Delete" Command="{Binding ClearSelectMonthDataCommand}">清空该月统计</btn:Button>
+                            <btn:Button ToolTip="清空本月该应用数据" HorizontalAlignment="Right" VerticalAlignment="Top" Background="#f51837" Foreground="White" MinWidth="120" Margin="0" Icon="Delete" Command="{Binding ClearSelectMonthDataCommand}">清空该月统计</btn:Button>
 
                         </Grid>
                         <Grid  Margin="0,20,0,0">
@@ -239,7 +239,7 @@
                                                 <RowDefinition Height="auto"/>
                                                 <RowDefinition Height="auto"/>
                                             </Grid.RowDefinitions>
-                                            <TextBlock Foreground="{DynamicResource SubTextBrush}"  Text="在当月所有使用应用时长中占比" FontSize="{DynamicResource AppFontSizeBody}" />
+                                            <TextBlock Foreground="{DynamicResource SubTextBrush}"  Text="占当月总时长" FontSize="{DynamicResource AppFontSizeBody}" />
 
                                             <TextBlock Foreground="{DynamicResource DefaultTextBrush}" Grid.Row="1" Margin="0,10,0,0" FontSize="24"><Run Text="{Binding Ratio}"/>
                                             </TextBlock>

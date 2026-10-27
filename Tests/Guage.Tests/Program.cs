@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 
 namespace Guage.Tests
 {
@@ -23,6 +23,7 @@ namespace Guage.Tests
             UnzipTests.RunAll();
             UpdatePackageVerifierTests.RunAll();
             UpdateSignatureVerifierTests.RunAll();
+            ExportTests.RunAll();
             BreakReminderTests.RunAll();
             AppConfigTests.RunAll();
 

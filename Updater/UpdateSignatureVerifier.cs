@@ -16,7 +16,7 @@ namespace Updater
         /// 对应私钥 guage-release.key 仅存于发布机，绝不进入仓库。
         /// 若私钥泄露需要轮换：新公钥先放 PublicKeyV2 过渡发布，随后移除旧公钥。
         /// </summary>
-        public const string PublicKeyV1 = "pkHmKHJ++6JB/Cx/BmTonmWvmoSY3aHmmFLyRZLSgAs=";
+        public const string PublicKeyV1 = "u3SxY3LvpupEF1ecp1zQj7FjnZZCkGW5VKdUJAMqBZY=";
 
         /// <summary>
         /// 密钥轮换过渡期使用：新公钥先放 V2，发布若干版本后移除旧公钥并把 V2 提升为 V1。

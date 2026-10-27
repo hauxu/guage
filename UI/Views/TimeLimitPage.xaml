@@ -211,7 +211,7 @@
             <btn:Button Icon="Delete" Content="{Binding DeleteButtonText}" MinWidth="88" Margin="8,0,0,0"
                         Command="{Binding RemoveRuleCommand}" IsEnabled="{Binding HasSelection}"/>
             <btn:Button Icon="Refresh" Content="重新同步" Width="110" Margin="8,0,0,0"
-                        Command="{Binding ResyncTodayCommand}" ToolTip="自动检查新的一天，并重新同步今日应用时长"/>
+                        Command="{Binding ResyncTodayCommand}" ToolTip="跨天自动同步"/>
         </StackPanel>
 
         <!-- 规则列表 -->
@@ -326,7 +326,7 @@
                                                                  Text="{Binding CountdownOpacityText, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
                                                 </StackPanel>
                                                 <CheckBox Content="三击隐藏倒计时窗" IsChecked="{Binding HideByTripleClick, Mode=TwoWay}" Margin="0,6,0,0"
-                                                          ToolTip="仅作用于倒计时窗，锁定遮罩不可隐藏"/>
+                                                          ToolTip="仅限倒计时窗"/>
                                                 <CheckBox Content="结束后禁止再次启动" IsChecked="{Binding BanRestart, Mode=TwoWay}" Margin="0,6,0,0"/>
                                             </StackPanel>
                                         </base:View>
@@ -339,7 +339,7 @@
                                                                IsShowIcon="False" Padding="10,6"/>
                                                 <input:InputBox Text="{Binding CustomPasswordText, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
                                                                 MinHeight="32" CornerRadius="8" Margin="0,6,0,0" Placeholder="自定义密码(留空则随机)"/>
-                                                <TextBlock Text="解锁后再次锁定(分钟,0=不锁)" Style="{StaticResource FieldLabel}" Margin="0,10,0,0"/>
+                                                <TextBlock Text="解锁后重锁(分钟，0=不锁)" Style="{StaticResource FieldLabel}" Margin="0,10,0,0"/>
                                                 <input:InputBox Text="{Binding RelockMinutesText, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
                                                                 MinHeight="32" CornerRadius="8"/>
                                                 <CheckBox Content="锁定期间退出重开立即锁定" IsChecked="{Binding RelockAfterExit, Mode=TwoWay}" Margin="0,8,0,0"/>
