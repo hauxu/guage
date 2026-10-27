@@ -143,6 +143,17 @@ namespace UI.Controls.Base
                 StopWaitingForWidth();
                 StopMarquee();
             };
+            MouseEnter += (_, __) =>
+            {
+                _marqueeHovered = true;
+                ResumeMarqueeIfNeeded();
+            };
+            MouseLeave += (_, __) =>
+            {
+                _marqueeHovered = false;
+                PauseMarquee();
+            };
+
             SizeChanged += (_, __) => RequestLayoutUpdate();
             IsVisibleChanged += (_, __) =>
             {
@@ -486,13 +497,13 @@ namespace UI.Controls.Base
             }
 
             _layoutUpdateScheduled = true;
+            //  只投递一次。原来额外投了一次 Render 优先级，两次都会改布局，
+            //  配合 UpdateOverflowState 里的 InvalidateMeasure 会形成布局↔SizeChanged 的死循环
             Dispatcher.BeginInvoke(new Action(() =>
             {
                 _layoutUpdateScheduled = false;
                 UpdateOverflowState();
             }), DispatcherPriority.Loaded);
-
-            Dispatcher.BeginInvoke(new Action(UpdateOverflowState), DispatcherPriority.Render);
         }
 
         private void BeginWaitingForWidth()
@@ -555,11 +566,31 @@ namespace UI.Controls.Base
             return width;
         }
 
+        private bool _hasOverflowState;
+        private string _lastStateText;
+        private double _lastStateWidth = -1;
+
         private void UpdateOverflowState()
         {
             ApplyAppearance();
 
             var text = Text ?? string.Empty;
+
+            //  幂等短路：文本与视口宽度都没变时直接返回。
+            //  下面会 InvalidateMeasure，布局跑完又触发 SizeChanged → 再次进来，
+            //  不短路就是一个永不停止的布局循环，UI 线程会被吃满一个核
+            var currentViewport = GetViewportWidth();
+            if (_hasOverflowState
+                && string.Equals(text, _lastStateText, StringComparison.Ordinal)
+                && Math.Abs(currentViewport - _lastStateWidth) < 0.5)
+            {
+                return;
+            }
+
+            _hasOverflowState = true;
+            _lastStateText = text;
+            _lastStateWidth = currentViewport;
+
             _staticText.Text = text;
 
             if (string.IsNullOrEmpty(text))
@@ -620,9 +651,18 @@ namespace UI.Controls.Base
             }
         }
 
+        //  只有鼠标悬停时才滚动。列表里几十行长文本如果都自动跑马灯，
+        //  等于挂着几十个 Forever 动画，每帧都让整窗失效重绘，CPU 直接吃满
+        private bool _marqueeHovered;
+
         private void ResumeMarqueeIfNeeded()
         {
             if (!_isOverflow || !IsLoaded || !IsVisible || string.IsNullOrEmpty(_lastSegmentText) || _marqueePausedByUser)
+            {
+                return;
+            }
+
+            if (!_marqueeHovered)
             {
                 return;
             }

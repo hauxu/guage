@@ -117,7 +117,19 @@ namespace Core.Servicers.Instances
             _isStart = true;
             _hook = SetWinEventHook(0x0003, 0x0003, IntPtr.Zero, _foregroundEventDelegate, 0, 0, 0);
             HandleForegroundWindow();
-        }
+        
+            //  启动时先确定一次当前前台应用：否则要等用户切窗口才有第一个事件，
+            //  期间时长限制拿不到活跃应用、统计也会空一段
+            try
+            {
+                _lastForegroundHwnd = IntPtr.Zero;
+                DelayDetect();
+            }
+            catch (Exception ex)
+            {
+                Logger.Error("启动时探测前台应用失败：" + ex.Message);
+            }
+}
 
         public void Stop()
         {

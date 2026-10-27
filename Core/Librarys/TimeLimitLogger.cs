@@ -26,6 +26,14 @@ namespace Core.Librarys
             Write($"[关闭] {appName} ({processName}) 进程已结束，PID={pid}");
         }
 
+        /// <summary>
+        /// 诊断行：即时落盘，便于出问题时直接看现场（心跳、睡眠状态、前台应用）。
+        /// </summary>
+        public static void LogDiag(string message)
+        {
+            Write("[诊断] " + message);
+        }
+
         private static void Write(string message)
         {
             try

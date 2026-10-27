@@ -209,8 +209,21 @@ namespace UI.ViewModels
             _autoRefreshSubscription = null;
         }
 
+        private string _lastAutoRefreshProcess;
+
         private void OnAutoRefresh()
         {
+            //  前台应用没变时不必整表重建：这一行已经由 1 秒 tick 原地更新，
+            //  剩下的重建只会让整张列表重新生成一遍（数据量大时很贵）
+            var live = _appTimer.GetAppDuration();
+            string current = live?.App?.Process;
+            if (!string.IsNullOrEmpty(current) && string.Equals(current, _lastAutoRefreshProcess, StringComparison.OrdinalIgnoreCase))
+            {
+                return;
+            }
+
+            _lastAutoRefreshProcess = current;
+
             // 5 秒周期整表刷新：不带加载占位，避免每次刷新闪烁
             LoadData(showLoadingPlaceholder: false);
         }

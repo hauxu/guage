@@ -76,6 +76,7 @@ namespace Core.Servicers.Instances
         private void Sleepdiscover_SleepStatusChanged(SleepStatus status)
         {
             _isSleeping = status == SleepStatus.Sleep;
+            TimeLimitLogger.LogDiag("睡眠状态变化 -> " + status);
         }
 
         public void Start()
@@ -300,9 +301,16 @@ namespace Core.Servicers.Instances
 
         private void AppObserver_OnAppActiveChanged(object sender, AppActiveChangedEventArgs e)
         {
-            if (e?.App == null || e.App.Type == AppType.SystemComponent)
+            if (e?.App == null)
             {
                 _activeApp = AppInfo.Empty;
+                return;
+            }
+
+            //  桌面、任务栏、提示窗这类系统组件会把前台刷成 SystemComponent。
+            //  原来这里直接清空，导致用户切一下窗口、限制就不再累计 —— 保留上一个真实应用
+            if (e.App.Type == AppType.SystemComponent)
+            {
                 return;
             }
             // guage self foreground: keep previous app so time-limit keeps working across page switches
@@ -312,10 +320,35 @@ namespace Core.Servicers.Instances
             }
 
             _activeApp = e.App;
+
+            //  睡眠检测可能漏发唤醒（锁屏/全屏/会话切换），_isSleeping 会一直是 true，
+            //  结果统计照常走、时长限制永久失效。前台一变化说明人还在用，直接清掉
+            if (_isSleeping)
+            {
+                _isSleeping = false;
+                TimeLimitLogger.LogDiag("前台变化，恢复计时（此前处于睡眠态）");
+            }
         }
+
+        private DateTime _lastHeartbeat = DateTime.MinValue;
 
         private void Timer_Elapsed(object sender, ElapsedEventArgs e)
         {
+            if (DateTime.Now - _lastHeartbeat >= TimeSpan.FromSeconds(30))
+            {
+                _lastHeartbeat = DateTime.Now;
+                var hbRule = FindRule(_activeApp);
+                string hbDetail = "";
+                if (hbRule != null)
+                {
+                    hbDetail = "，命中=" + hbRule.Name
+                        + "，用量=" + GetUsageSeconds(GetRuleKey(hbRule)) + "/" + (Math.Max(1, hbRule.LimitMinutes) * 60);
+                }
+                TimeLimitLogger.LogDiag("心跳 启用=" + _isEnabled + "，睡眠=" + _isSleeping
+                    + "，前台=" + (string.IsNullOrEmpty(_activeApp.Process) ? "(空)" : _activeApp.Process)
+                    + "，规则数=" + (_rules?.Count ?? 0) + hbDetail);
+            }
+
             if (!_isEnabled || _isSleeping)
             {
                 return;
