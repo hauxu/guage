@@ -57,6 +57,11 @@ namespace Updater
             return !(nowVersion == Info.Version);
         }
 
+        /// <summary>
+        /// 最近一次获取版本失败的原因，供界面提示与排查使用。
+        /// </summary>
+        public static string LastError { get; private set; } = string.Empty;
+
         public async Task<VersionInfo> GetRequest()
         {
             VersionInfo result = await Task.Run(() =>
@@ -115,8 +120,9 @@ namespace Updater
                         return Info;
                     }
                 }
-                catch
+                catch (Exception ex)
                 {
+                    LastError = ex.Message;
                     return null;
                 }
             });

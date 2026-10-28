@@ -170,7 +170,7 @@ namespace UI.Controls.Window
             if (_passwordMode == 0)
             {
                 // 自定义密码：SHA256 比较
-                ok = string.Equals(Sha256(input), _customPasswordHash, StringComparison.OrdinalIgnoreCase);
+                ok = PasswordHasher.Verify(input, _customPasswordHash);
             }
             else
             {
@@ -200,7 +200,7 @@ namespace UI.Controls.Window
             {
                 string input = PasswordInput.Password;
                 bool ok = _passwordMode == 0
-                    ? string.Equals(Sha256(input), _customPasswordHash, StringComparison.OrdinalIgnoreCase)
+                    ? PasswordHasher.Verify(input, _customPasswordHash)
                     : string.Equals(input, _randomPassword, StringComparison.Ordinal);
                 if (!ok)
                 {

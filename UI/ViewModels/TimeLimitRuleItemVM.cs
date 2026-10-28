@@ -6,6 +6,7 @@ using System.Security.Cryptography;
 using System.Text;
 using UI.Controls.Select;
 using UI.Models;
+using Core.Librarys;
 
 namespace UI.ViewModels
 {
@@ -245,7 +246,7 @@ namespace UI.ViewModels
             set
             {
                 if (string.IsNullOrWhiteSpace(value)) return;
-                _model.CustomPasswordHash = Sha256(value);
+                _model.CustomPasswordHash = PasswordHasher.Create(value);
                 OnPropertyChanged();
                 _onChanged?.Invoke();
             }

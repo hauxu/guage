@@ -18,28 +18,14 @@ namespace Updater
         protected override void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
-            //  阻止多开和用户主动启动
+
+            //  只允许主程序带版本号拉起；参数缺失或已有实例在跑就直接退出
             if (e.Args.Length == 0 || IsRuned())
             {
                 Shutdown();
+                return;
             }
-
-            Activated += (s, e2) =>
-            {
-                var mainWindow = App.Current.MainWindow;
-                if (mainWindow.DataContext != null)
-                {
-                    var mainModel = mainWindow.DataContext as MainModel;
-                    if (string.IsNullOrEmpty(mainModel.Version))
-                    {
-                        mainModel.Version = e.Args[0];
-                    }
-                }
-            };
         }
-
-
-
 
 
         #region 获取当前程序是否已运行

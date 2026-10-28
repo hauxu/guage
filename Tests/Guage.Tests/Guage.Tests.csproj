@@ -69,6 +69,7 @@ et45\EntityFramework.dll</HintPath>
   <ItemGroup>
     <Compile Include="Assert.cs" />
     <Compile Include="ExportTests.cs" />
+    <Compile Include="PasswordHasherTests.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="DurationBucketingTests.cs" />
     <Compile Include="MsgIdDeduperTests.cs" />

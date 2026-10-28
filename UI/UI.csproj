@@ -587,6 +587,15 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <!-- 伴生程序：只需要保证构建顺序与产出同目录，不引用其程序集 -->
+    <ProjectReference Include="..\Updater\Updater.csproj">
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <Private>false</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\GuageBug\GuageBug.csproj">
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <Private>false</Private>
+    </ProjectReference>
     <ProjectReference Include="..\Core\Core.csproj">
       <Project>{fa57023c-3399-45a4-a339-e453002bd878}</Project>
       <Name>Core</Name>
@@ -675,5 +684,12 @@
     <Copy SourceFiles="@(BrowserExtensionFiles)"
           DestinationFiles="@(BrowserExtensionFiles->'$(OutputPath)Guage.Chrome\%(RecursiveDir)%(Filename)%(Extension)')"
           SkipUnchangedFiles="true" />
+  </Target>
+  <!-- 更新器与崩溃上报程序要和主程序在同一目录，设置里的「检查更新」与崩溃弹窗都按相对路径启动 -->
+  <Target Name="CopyCompanionApps" AfterTargets="Build">
+    <Copy SourceFiles="..\Updater\bin\$(Configuration)\Updater.exe"
+          DestinationFolder="$(OutputPath)" SkipUnchangedFiles="true" Condition="Exists('..\Updater\bin\$(Configuration)\Updater.exe')" />
+    <Copy SourceFiles="..\GuageBug\bin\$(Configuration)\GuageBug.exe"
+          DestinationFolder="$(OutputPath)" SkipUnchangedFiles="true" Condition="Exists('..\GuageBug\bin\$(Configuration)\GuageBug.exe')" />
   </Target>
 </Project>

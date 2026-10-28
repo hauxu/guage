@@ -54,6 +54,14 @@ namespace Updater
             DataContext = mainModel;
 
             mainModel.PropertyChanged += MainModel_PropertyChanged;
+
+            //  版本号在构造时定下来：原来靠窗口 Activated 事件赋值，窗口没被激活就一直是空，
+            //  后续检查逻辑空引用直接退出，用户看到的是「点了没反应」
+            string[] args = Environment.GetCommandLineArgs();
+            if (args.Length > 1)
+            {
+                mainModel.Version = args[1];
+            }
         }
 
         private void MainModel_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
@@ -515,7 +523,7 @@ namespace Updater
             {
                 UpdateBtn.Visibility = Visibility.Visible;
                 UpdateBtn.IsEnabled = false;
-                SetStatus("获取版本失败，检查网络", false);
+                SetStatus("获取版本失败（网络或访问频率受限），稍后重试", false);
             }
             ReCheckBtn.Visibility = Visibility.Visible;
             ReCheckBtn.IsEnabled = true;

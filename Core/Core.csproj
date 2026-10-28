@@ -162,6 +162,7 @@
     <Compile Include="Librarys\DurationBucketing.cs" />
     <Compile Include="Librarys\MsgIdDeduper.cs" />
     <Compile Include="Librarys\TimeLimitLogic.cs" />
+    <Compile Include="Librarys\PasswordHasher.cs" />
     <Compile Include="Librarys\RingAllocation.cs" />
     <Compile Include="Librarys\Browser\BrowserExtensionInstallInfo.cs" />
     <Compile Include="Librarys\Browser\BrowserExtensionPathHelper.cs" />

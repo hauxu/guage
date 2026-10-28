@@ -24,6 +24,7 @@ namespace Guage.Tests
             UpdatePackageVerifierTests.RunAll();
             UpdateSignatureVerifierTests.RunAll();
             ExportTests.RunAll();
+            PasswordHasherTests.RunAll();
             BreakReminderTests.RunAll();
             AppConfigTests.RunAll();
 
