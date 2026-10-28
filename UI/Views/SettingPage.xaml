@@ -139,13 +139,7 @@
                                     Margin="16,0,0,0" VerticalAlignment="Center" MinWidth="120"
                                     Icon="SetlockScreen" Content="检查更新"/>
                     </StackPanel>
-                    <TextBlock Margin="0,24,0,0" Style="{StaticResource SettingsSectionTitle}" Text="浏览器扩展安装"/>
-                    <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
-                        <Btn:Button Command="{Binding OpenURL}" CommandParameter="{Binding ChromeWebStoreUrl}"
-                                    MinWidth="120" Icon="Shop" Content="Chrome 商店"/>
-                        <Btn:Button Command="{Binding OpenURL}" CommandParameter="{Binding EdgeAddOnsUrl}"
-                                    Margin="12,0,0,0" MinWidth="120" Icon="Globe" Content="Edge 商店"/>
-                    </StackPanel>
+                    <TextBlock Margin="0,24,0,0" Style="{StaticResource SettingsSectionTitle}" Text="浏览器扩展"/>
                     <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
                         <Btn:Button Command="{Binding OpenBrowserExtensionFolderCommand}"
                                     MinWidth="160"
@@ -156,9 +150,6 @@
                     </StackPanel>
                     <TextBlock Margin="0,12,0,0" FontSize="{DynamicResource AppFontSizeSecondary}">
                         <Run Text="开源 "/><Hyperlink Command="{Binding OpenURL}" CommandParameter="https://github.com/hauxu/guage">https://github.com/hauxu/guage</Hyperlink>
-                    </TextBlock>
-                    <TextBlock Margin="0,8,0,0" FontSize="{DynamicResource AppFontSizeSecondary}">
-                        <Run Text="讨论 "/><Hyperlink Command="{Binding OpenURL}" CommandParameter="https://github.com/hauxu/guage/discussions">https://github.com/hauxu/guage/discussions</Hyperlink>
                     </TextBlock>
                 </StackPanel>
             </Border>

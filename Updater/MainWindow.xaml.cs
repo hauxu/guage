@@ -71,13 +71,13 @@ namespace Updater
             //  安全优先：校验和文件与 Ed25519 签名缺一不可（SHA256 同源校验只能防损坏，签名才能防篡改）
             if (!HasChecksum || !HasSignature)
             {
-                SetStatus("该版本缺少 SHA256 校验文件或签名文件，已中止更新。", false);
+                SetStatus("缺少校验文件，已中止", false);
                 UpdateBtn.Visibility = Visibility.Visible;
                 ReCheckBtn.Visibility = Visibility.Visible;
                 return;
             }
 
-            SetStatus("正在下载新版本文件...", false);
+            SetStatus("正在下载…", false);
 
             UpdateBtn.Visibility = Visibility.Collapsed;
             ReCheckBtn.Visibility = Visibility.Collapsed;
@@ -163,7 +163,7 @@ namespace Updater
                     TryDeleteLocal(zipPath);
                     TryDeleteLocal(checksumPath);
                     TryDeleteLocal(signaturePath);
-                    SetStatus("更新包签名校验失败，文件可能已被篡改，已中止安装。", false);
+                    SetStatus("签名校验失败，已中止", false);
                     UpdateBtn.Visibility = Visibility.Visible;
                     ReCheckBtn.Visibility = Visibility.Visible;
                     return;
@@ -177,7 +177,7 @@ namespace Updater
                     TryDeleteLocal(zipPath);
                     TryDeleteLocal(checksumPath);
                     TryDeleteLocal(signaturePath);
-                    SetStatus("更新包校验失败，文件可能已被篡改，已中止安装。", false);
+                    SetStatus("校验失败，已中止", false);
                     UpdateBtn.Visibility = Visibility.Visible;
                     ReCheckBtn.Visibility = Visibility.Visible;
                     return;
@@ -187,7 +187,7 @@ namespace Updater
                 string unpath = ResolveTargetRoot();
                 if (string.IsNullOrEmpty(unpath))
                 {
-                    SetStatus("未找到主程序 guage.exe，无法完成更新。", false);
+                    SetStatus("找不到 guage.exe", false);
                     UpdateBtn.Visibility = Visibility.Visible;
                     ReCheckBtn.Visibility = Visibility.Visible;
                     return;
@@ -215,7 +215,7 @@ namespace Updater
                     }
                 }
 
-                SetStatus("下载完成，正在解压请勿关闭此窗口...");
+                SetStatus("正在解压…");
 
                 string tempDir = System.IO.Path.Combine(
                     System.IO.Path.GetTempPath(),
@@ -237,14 +237,14 @@ namespace Updater
                 if (!unresult)
                 {
                     TryDeleteDirectory(tempDir);
-                    SetStatus("解压文件时发生异常，请重试！", false);
+                    SetStatus("解压失败，请重试", false);
                     UpdateBtn.Visibility = Visibility.Visible;
                     ReCheckBtn.Visibility = Visibility.Visible;
                     return;
                 }
 
                 //  备份旧文件后原子覆盖安装，失败自动回滚
-                SetStatus("正在安装更新，请勿关闭此窗口...");
+                SetStatus("正在安装…");
                 bool applied = await Task.Run(() => ApplyUpdate(tempDir, unpath));
                 TryDeleteDirectory(tempDir);
 
@@ -261,12 +261,12 @@ namespace Updater
                     }
                     catch
                     {
-                        SetStatus("更新完成，但启动更矩失败，请手动启动。", false);
+                        SetStatus("更新完成，请手动启动", false);
                     }
                 }
                 else
                 {
-                    SetStatus("安装更新失败，已回滚，请重试！", false);
+                    SetStatus("安装失败，已回滚", false);
                     UpdateBtn.Visibility = Visibility.Visible;
                     ReCheckBtn.Visibility = Visibility.Visible;
                 }
@@ -274,7 +274,7 @@ namespace Updater
             else
             {
                 //下载发生异常
-                SetStatus("下载时发生异常，请重试。", false);
+                SetStatus("下载失败，请重试", false);
                 UpdateBtn.Visibility = Visibility.Visible;
             }
         }
@@ -501,21 +501,21 @@ namespace Updater
                         PreTag.Visibility = Visibility.Visible;
                     }
                     SetStatus(HasChecksum && HasSignature
-                        ? "检测到新的版本！"
-                        : "检测到新版本，但发布包缺少 SHA256 校验文件或签名文件，无法安全更新。", false);
+                        ? "发现新版本"
+                        : "新版本缺少校验文件，无法更新", false);
                 }
                 else
                 {
                     UpdateBtn.Visibility = Visibility.Visible;
                     UpdateBtn.IsEnabled = false;
-                    SetStatus("目前没有可用的更新。", false);
+                    SetStatus("已是最新版本", false);
                 }
             }
             else
             {
                 UpdateBtn.Visibility = Visibility.Visible;
                 UpdateBtn.IsEnabled = false;
-                SetStatus("无法获取版本信息，请检查代理或网络。", false);
+                SetStatus("获取版本失败，检查网络", false);
             }
             ReCheckBtn.Visibility = Visibility.Visible;
             ReCheckBtn.IsEnabled = true;

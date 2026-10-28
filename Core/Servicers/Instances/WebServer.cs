@@ -59,7 +59,7 @@ namespace Core.Servicers.Instances
                     }
 
                     webSocketServer = new WebSocketServer(IPAddress.Loopback, webSocketPort, false);
-                    webSocketServer.AddWebSocketService<GuageWebSocketBehavior>("/GuageWebSentry");
+                    webSocketServer.AddWebSocketService<GuageWebSocketBehavior>("/guage-web");
                     webSocketServer.Start();
 
                     _tokenHttpServer = tokenServer;

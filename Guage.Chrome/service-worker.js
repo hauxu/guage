@@ -8,4 +8,4 @@ tracker.bindSleepHandlers();
 tracker.start();
 connection.init();
 
-console.log('[guage Sentry] 扩展已加载（Chrome / Edge）');
+console.log('[网页统计] 已加载');

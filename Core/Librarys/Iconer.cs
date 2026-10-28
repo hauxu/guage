@@ -144,7 +144,7 @@ namespace Core.Librarys
 
                         if (!string.IsNullOrEmpty(iconFile) && File.Exists(iconFile))
                         {
-                            //  copy to tai dir
+                            //  复制到应用图标目录
 
                             File.Copy(iconFile, iconPath);
 

@@ -1,7 +1,7 @@
 {
     "manifest_version": 3,
-    "name": "guage Sentry",
-    "description": "更矩 网页浏览数据统计扩展，支持 Chrome / Edge。仅与本机 更矩 客户端通信。",
+    "name": "更矩 网页统计",
+    "description": "记录网页浏览时长，只与本机 更矩 通信。",
     "version": "1.0.0",
     "minimum_chrome_version": "116",
     "icons": {
@@ -11,7 +11,7 @@
         "128": "icons/icon128.png"
     },
     "action": {
-        "default_title": "guage Sentry",
+        "default_title": "更矩 网页统计",
         "default_icon": {
             "16": "icons/icon16.png",
             "32": "icons/icon32.png",

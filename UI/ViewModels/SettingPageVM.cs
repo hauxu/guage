@@ -177,10 +177,7 @@ namespace UI.ViewModels
 
             Version = Assembly.GetExecutingAssembly().GetName().Version.ToString();
 
-            SetExtensionInstallUrls(
-                BrowserExtensionInstallInfo.ChromeWebStoreUrl,
-                BrowserExtensionInstallInfo.EdgeAddOnsUrl,
-                BrowserExtensionInstallInfo.InstallGuideUrl);
+            SetExtensionInstallUrls(BrowserExtensionInstallInfo.InstallGuideUrl);
 
             DelDataStartMonthDate = DateTime.Now;
             DelDataEndMonthDate = DateTime.Now;

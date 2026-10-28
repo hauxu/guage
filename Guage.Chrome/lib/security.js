@@ -67,7 +67,7 @@ export function buildLocalWebSocketUrl(port) {
         throw new Error('非法 WebSocket 端口');
     }
 
-    return `ws://127.0.0.1:${port}/GuageWebSentry`;
+    return `ws://127.0.0.1:${port}/guage-web`;
 }
 
 export function buildLocalTokenUrl(port, path) {

@@ -155,7 +155,7 @@
                                            Foreground="{DynamicResource ThemeBrush}"/>
                                 <TextBlock Text="{Binding WorkDurationText}" Style="{StaticResource DurationNumber}" Margin="0,10,0,0"/>
                                 <TextBlock Margin="0,12,0,0" Style="{StaticResource PageHint}" HorizontalAlignment="Center" TextAlignment="Center"
-                                           Text="左柱 1 圈 = 1 小时&#10;右柱 1 圈 = 10 分钟"/>
+                                           Text="1 圈 = 1 小时 / 10 分钟"/>
                             </StackPanel>
                         </Border>
                     </StackPanel>
@@ -181,7 +181,7 @@
                                            Foreground="{DynamicResource ThemeBrush}"/>
                                 <TextBlock Text="{Binding BreakDurationText}" Style="{StaticResource DurationNumber}" Margin="0,10,0,0"/>
                                 <TextBlock Margin="0,12,0,0" Style="{StaticResource PageHint}" HorizontalAlignment="Center" TextAlignment="Center"
-                                           Text="左柱 1 圈 = 30 分钟&#10;右柱 1 圈 = 5 分钟"/>
+                                           Text="1 圈 = 30 / 5 分钟"/>
                             </StackPanel>
                         </Border>
                     </StackPanel>

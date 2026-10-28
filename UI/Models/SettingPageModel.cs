@@ -59,17 +59,11 @@ namespace UI.Models
         private DateTime ExportDataEndMonthDate_;
         public DateTime ExportDataEndMonthDate { get { return ExportDataEndMonthDate_; } set { ExportDataEndMonthDate_ = value; OnPropertyChanged(); } }
 
-        public string ChromeWebStoreUrl { get; private set; }
-        public string EdgeAddOnsUrl { get; private set; }
         public string ExtensionInstallGuideUrl { get; private set; }
 
-        public void SetExtensionInstallUrls(string chromeStoreUrl, string edgeStoreUrl, string guideUrl)
+        public void SetExtensionInstallUrls(string guideUrl)
         {
-            ChromeWebStoreUrl = chromeStoreUrl;
-            EdgeAddOnsUrl = edgeStoreUrl;
             ExtensionInstallGuideUrl = guideUrl;
-            OnPropertyChanged(nameof(ChromeWebStoreUrl));
-            OnPropertyChanged(nameof(EdgeAddOnsUrl));
             OnPropertyChanged(nameof(ExtensionInstallGuideUrl));
         }
     }

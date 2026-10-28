@@ -67,11 +67,6 @@ namespace GuageBug
         {
             Process.Start(new ProcessStartInfo("https://github.com/hauxu/guage/issues/new"));
         }
-        private void EmailHyperlinkClick(object sender, RoutedEventArgs e)
-        {
-            Clipboard.SetText("heis@thelittlepandaisbehind.com");
-            MessageBox.Show("邮箱已复制");
-        }
         private void Restart(object sender, RoutedEventArgs e)
         {
             string guagePath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory,
@@ -82,7 +77,7 @@ namespace GuageBug
             }
             else
             {
-                MessageBox.Show("guage.exe 似乎已被删除", "重启失败提示", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("找不到 guage.exe", "重启失败", MessageBoxButton.OK, MessageBoxImage.Error);
                 Process.Start(new ProcessStartInfo("https://github.com/hauxu/guage"));
             }
             Close();
