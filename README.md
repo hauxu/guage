@@ -52,6 +52,10 @@ Tests\\Guage.Tests\\bin\\Debug\\Guage.Tests.exe
 
 发布包要一起上传 `.sha256` 与 `.sha256.sig`，用 `python scripts/sign-release.py <zip>` 生成，否则客户端不会安装更新。
 
+## 来源
+
+界面与功能基于 [Tai](https://github.com/planshit/Tai)（MIT）修改，本项目在其基础上重构并继续维护。
+
 ## 许可
 
 MIT，见 LICENSE。
