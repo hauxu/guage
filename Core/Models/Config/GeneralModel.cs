@@ -11,7 +11,7 @@ namespace Core.Models.Config
     /// </summary>
     public class GeneralModel
     {
-        [Config(Name = "开机自启动", Description = "", Group = "基础")]
+        [Config(Name = "开机自启动", Description = "需要管理员权限", Group = "基础")]
         /// <summary>
         /// 是否启用开机自启动
         /// </summary>
