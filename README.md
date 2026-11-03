@@ -6,8 +6,6 @@
 [![Release](https://img.shields.io/github/v/release/hauxu/guage)](https://github.com/hauxu/guage/releases)
 ![Platform](https://img.shields.io/badge/platform-Windows%2010%2B-0078d4)
 
-![更矩 主界面](docs/images/screenshot-main.jpg)
-
 > 数据全在本机：没有账号，没有云端，没有遥测。
 
 ## 功能
