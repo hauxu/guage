@@ -1,0 +1,57 @@
+name: 缺陷报告
+description: 记录一个可复现的问题
+title: "[Bug] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        请先确认已升级到最新版本。请勿在公开 issue 中粘贴含个人使用记录的截图或数据文件；安全问题请按安全策略私下报告。
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: 发生了什么
+      description: 实际看到的现象，越具体越好
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: 复现步骤
+      placeholder: |
+        1. 打开 ...
+        2. 点击 ...
+        3. 看到 ...
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: 更矩版本
+      description: 设置里可查看，或写下载包的文件名
+      placeholder: v1.0.0
+    validations:
+      required: true
+  - type: input
+    id: os
+    attributes:
+      label: Windows 版本
+      placeholder: Windows 11 23H2
+    validations:
+      required: true
+  - type: dropdown
+    id: admin
+    attributes:
+      label: 是否以管理员身份运行
+      options:
+        - 是
+        - 否
+        - 不确定
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: 期望的结果
+    validations:
+      required: false

@@ -53,6 +53,8 @@
 2. 点击「加载已解压的扩展程序」，指向 `Guage.Chrome` 目录
 3. 回到客户端，在「设置 > 常规 > 功能」里打开网页统计；首页右上角出现「已连接」，配置即生效
 
+扩展的安装细节与权限说明见 [Guage.Chrome/README.md](Guage.Chrome/README.md)。
+
 扩展只与本机客户端通信，不上传任何数据。
 
 ## 数据与隐私
@@ -92,6 +94,7 @@
 
 - 缺陷与建议：[Issues](https://github.com/hauxu/guage/issues)
 - 使用讨论：[Discussions](https://github.com/hauxu/guage/discussions)
+- 安全问题：请勿公开提 issue，按 [安全策略](.github/SECURITY.md) 私下报告
 
 ## 致谢与许可
 
